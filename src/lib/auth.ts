@@ -11,6 +11,7 @@ export type SafeUser = {
   id: string;
   name: string;
   email: string;
+  currencyCode: string;
 };
 
 function hashSessionToken(token: string) {
@@ -63,6 +64,7 @@ export async function getCurrentUser(): Promise<SafeUser | null> {
           id: true,
           name: true,
           email: true,
+          currencyCode: true,
         },
       },
     },

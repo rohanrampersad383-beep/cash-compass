@@ -1,9 +1,11 @@
 import { ShieldCheck } from "lucide-react";
+import { CurrencySettings } from "@/components/finance/currency-settings";
 import { PageHeader } from "@/components/finance/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { requireUser } from "@/lib/auth";
+import { normalizeCurrency } from "@/lib/finance";
 
 export default async function SettingsPage() {
   const user = await requireUser();
@@ -19,8 +21,10 @@ export default async function SettingsPage() {
         <CardContent className="grid gap-4">
           <Setting label="Name" value={user.name} />
           <Setting label="Email" value={user.email} />
+          <Setting label="Display currency" value={normalizeCurrency(user.currencyCode)} />
         </CardContent>
       </Card>
+      <CurrencySettings initialCurrency={user.currencyCode} />
       <Card className="glass-panel">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">

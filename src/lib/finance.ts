@@ -1,6 +1,12 @@
 import { BillStatus, TransactionKind } from "@/generated/prisma/browser";
 
 export type MoneyLike = { toNumber?: () => number } | number | string;
+export type CurrencyCode = "TTD" | "USD";
+
+export const supportedCurrencies = [
+  { code: "TTD", label: "Trinidad and Tobago dollar", locale: "en-TT" },
+  { code: "USD", label: "US dollar", locale: "en-US" },
+] as const;
 
 export function toNumber(value: MoneyLike) {
   if (typeof value === "number") {
@@ -14,11 +20,28 @@ export function toNumber(value: MoneyLike) {
   return value.toNumber?.() ?? Number(value);
 }
 
-export function currency(value: number) {
-  return new Intl.NumberFormat("en-US", {
+export function normalizeCurrency(value?: string | null): CurrencyCode {
+  return value === "USD" ? "USD" : "TTD";
+}
+
+export function currency(value: number, currencyCode: CurrencyCode = "TTD") {
+  const locale = currencyCode === "USD" ? "en-US" : "en-TT";
+
+  return new Intl.NumberFormat(locale, {
     style: "currency",
-    currency: "USD",
+    currency: currencyCode,
     maximumFractionDigits: 0,
+  }).format(value);
+}
+
+export function compactCurrency(value: number, currencyCode: CurrencyCode = "TTD") {
+  const locale = currencyCode === "USD" ? "en-US" : "en-TT";
+
+  return new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency: currencyCode,
+    notation: "compact",
+    maximumFractionDigits: 1,
   }).format(value);
 }
 

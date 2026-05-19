@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { currency } from "@/lib/finance";
+import { currency, type CurrencyCode } from "@/lib/finance";
 
 type PreviewRow = {
   title: string;
@@ -21,7 +21,7 @@ type PreviewRow = {
   notes?: string;
 };
 
-export function CsvUpload() {
+export function CsvUpload({ currencyCode = "TTD" }: { currencyCode?: CurrencyCode }) {
   const router = useRouter();
   const [fileName, setFileName] = useState("");
   const [rows, setRows] = useState<PreviewRow[]>([]);
@@ -124,8 +124,8 @@ export function CsvUpload() {
             <>
               <div className="flex flex-wrap gap-2">
                 <Badge variant="secondary">{rows.length} rows ready</Badge>
-                <Badge variant="secondary">{currency(totals.income)} income</Badge>
-                <Badge variant="secondary">{currency(totals.expense)} expenses</Badge>
+                <Badge variant="secondary">{currency(totals.income, currencyCode)} income</Badge>
+                <Badge variant="secondary">{currency(totals.expense, currencyCode)} expenses</Badge>
               </div>
               <div className="max-h-96 overflow-auto rounded-xl border">
                 <Table>
@@ -143,7 +143,7 @@ export function CsvUpload() {
                         <TableCell>{row.date}</TableCell>
                         <TableCell>{row.title}</TableCell>
                         <TableCell>{row.kind.toLowerCase()}</TableCell>
-                        <TableCell className="text-right">{currency(row.amount)}</TableCell>
+                        <TableCell className="text-right">{currency(row.amount, currencyCode)}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

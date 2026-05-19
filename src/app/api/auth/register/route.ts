@@ -21,6 +21,7 @@ export async function POST(request: Request) {
       name: parsed.data.name,
       email: parsed.data.email,
       passwordHash: await hashPassword(parsed.data.password),
+      currencyCode: "TTD",
       categories: {
         create: [
           { name: "Salary", type: "INCOME", color: "#22c55e", icon: "briefcase" },

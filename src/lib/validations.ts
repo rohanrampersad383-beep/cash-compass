@@ -63,3 +63,7 @@ export const savingsGoalSchema = z.object({
   targetDate: dateString,
   color: z.string().trim().regex(/^#[0-9A-Fa-f]{6}$/).default("#22c55e"),
 });
+
+export const settingsSchema = z.object({
+  currencyCode: z.enum(["TTD", "USD"]),
+});

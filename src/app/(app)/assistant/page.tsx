@@ -2,20 +2,21 @@ import { Bot, Sparkles } from "lucide-react";
 import { PageHeader } from "@/components/finance/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { buildFinanceSummary, currency, percent, toNumber } from "@/lib/finance";
+import { buildFinanceSummary, currency, normalizeCurrency, percent, toNumber } from "@/lib/finance";
 import { requireUser } from "@/lib/auth";
 import { getFinanceData } from "@/lib/data";
 
 export default async function AssistantPage() {
   const user = await requireUser();
   const data = await getFinanceData(user.id);
+  const currencyCode = normalizeCurrency(user.currencyCode);
   const summary = buildFinanceSummary(data);
   const billTotal = summary.upcomingBills.reduce((total, bill) => total + toNumber(bill.amount), 0);
 
   const insights = [
     `Your highest spending category this month is ${summary.highestCategory?.name ?? "not available yet"}.`,
     `You saved ${percent(summary.savingsRate)} of your income this month.`,
-    `You have ${summary.upcomingBills.length} upcoming unpaid bills totaling ${currency(billTotal)}.`,
+    `You have ${summary.upcomingBills.length} upcoming unpaid bills totaling ${currency(billTotal, currencyCode)}.`,
     summary.expenseDelta > 0
       ? `Expenses increased ${Math.round(summary.expenseDelta)}% compared with last month. Review large recurring charges first.`
       : `Expenses decreased ${Math.abs(Math.round(summary.expenseDelta))}% compared with last month. Keep reinforcing that habit.`,
@@ -32,7 +33,7 @@ export default async function AssistantPage() {
             </div>
             <div>
               <CardTitle>Financial Tracks Assistant</CardTitle>
-              <CardDescription>Today’s guidance from your current data.</CardDescription>
+              <CardDescription>Today&apos;s guidance from your current data.</CardDescription>
             </div>
           </div>
         </CardHeader>

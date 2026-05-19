@@ -35,11 +35,12 @@ async function main() {
 
   const user = await prisma.user.upsert({
     where: { email: "demo@financialtracks.dev" },
-    update: { name: "Demo User", passwordHash },
+    update: { name: "Asha Demo", passwordHash, currencyCode: "TTD" },
     create: {
-      name: "Demo User",
+      name: "Asha Demo",
       email: "demo@financialtracks.dev",
       passwordHash,
+      currencyCode: "TTD",
     },
   });
 
@@ -56,9 +57,9 @@ async function main() {
     [
       ["Salary", CategoryType.INCOME, "#22c55e", "briefcase"],
       ["Freelance", CategoryType.INCOME, "#06b6d4", "sparkles"],
-      ["Food", CategoryType.EXPENSE, "#f59e0b", "utensils"],
+      ["Groceries", CategoryType.EXPENSE, "#f59e0b", "utensils"],
       ["Housing", CategoryType.EXPENSE, "#38bdf8", "home"],
-      ["Transport", CategoryType.EXPENSE, "#a78bfa", "car"],
+      ["Gas & transport", CategoryType.EXPENSE, "#a78bfa", "car"],
       ["Wellness", CategoryType.EXPENSE, "#fb7185", "heart"],
       ["Subscriptions", CategoryType.BILL, "#f97316", "repeat"],
       ["Utilities", CategoryType.BILL, "#14b8a6", "plug"],
@@ -79,24 +80,24 @@ async function main() {
 
   const incomes = [
     {
-      source: "Design salary",
-      amount: 6400,
+      source: "Marketing salary",
+      amount: 14500,
       date: date(1),
       categoryId: byName.get("Salary")?.id,
       isRecurring: true,
       frequency: Frequency.MONTHLY,
-      notes: "Primary paycheck",
+      notes: "Primary monthly salary",
     },
     {
-      source: "Freelance website audit",
-      amount: 1250,
+      source: "Freelance landing page build",
+      amount: 3200,
       date: date(9),
       categoryId: byName.get("Freelance")?.id,
-      notes: "One-off client work",
+      notes: "One-off client project",
     },
     {
       source: "Last month salary",
-      amount: 6400,
+      amount: 14500,
       date: date(1, -1),
       categoryId: byName.get("Salary")?.id,
       isRecurring: true,
@@ -122,14 +123,14 @@ async function main() {
   }
 
   const expenses = [
-    ["Whole Market", 186.42, 3, "Food", PaymentType.CARD, "Weekly groceries"],
-    ["Metro pass", 96, 4, "Transport", PaymentType.DIGITAL_WALLET, "Monthly pass"],
-    ["Apartment rent", 2100, 5, "Housing", PaymentType.BANK_TRANSFER, "Recurring housing"],
-    ["Lunch meetings", 128.75, 11, "Food", PaymentType.CARD, "Client lunch"],
-    ["Yoga studio", 84, 13, "Wellness", PaymentType.CARD, "Class pack"],
-    ["Ride share", 44.5, 18, "Transport", PaymentType.CARD, "Airport ride"],
-    ["Last month rent", 2100, 5, "Housing", PaymentType.BANK_TRANSFER, "Recurring housing", -1],
-    ["Last month groceries", 460, 13, "Food", PaymentType.CARD, "Groceries", -1],
+    ["Massy Stores groceries", 820.5, 3, "Groceries", PaymentType.CARD, "Weekly groceries"],
+    ["Unipet fuel", 340, 4, "Gas & transport", PaymentType.CARD, "Car fuel"],
+    ["Rent - St. Augustine", 5200, 5, "Housing", PaymentType.BANK_TRANSFER, "Monthly apartment rent"],
+    ["PriceSmart household run", 1180.75, 11, "Groceries", PaymentType.CARD, "Bulk groceries and household items"],
+    ["Pharmacy and wellness", 360, 13, "Wellness", PaymentType.CARD, "Medication and personal care"],
+    ["Maxi taxi and parking", 220, 18, "Gas & transport", PaymentType.CASH, "Local transport"],
+    ["Last month rent - St. Augustine", 5200, 5, "Housing", PaymentType.BANK_TRANSFER, "Monthly apartment rent", -1],
+    ["Last month groceries", 1720, 13, "Groceries", PaymentType.CARD, "Groceries and household items", -1],
   ] as const;
 
   for (const [merchant, amount, day, categoryName, paymentType, notes, monthOffset = 0] of expenses) {
@@ -169,17 +170,17 @@ async function main() {
   await prisma.bill.createMany({
     data: [
       {
-        name: "Netflix",
-        amount: 18.99,
-        dueDate: date(22),
+        name: "T&TEC electricity",
+        amount: 690,
+        dueDate: date(23),
         frequency: Frequency.MONTHLY,
         status: BillStatus.UNPAID,
-        categoryId: byName.get("Subscriptions")?.id,
+        categoryId: byName.get("Utilities")?.id,
         userId: user.id,
       },
       {
-        name: "Phone plan",
-        amount: 72,
+        name: "Digicel mobile plan",
+        amount: 225,
         dueDate: date(24),
         frequency: Frequency.MONTHLY,
         status: BillStatus.UNPAID,
@@ -187,21 +188,30 @@ async function main() {
         userId: user.id,
       },
       {
-        name: "Rent",
-        amount: 2100,
-        dueDate: date(5, 1),
+        name: "Rent - St. Augustine",
+        amount: 5200,
+        dueDate: date(1, 1),
+        frequency: Frequency.MONTHLY,
+        status: BillStatus.UNPAID,
+        categoryId: byName.get("Housing")?.id,
+        userId: user.id,
+      },
+      {
+        name: "WASA water",
+        amount: 180,
+        dueDate: date(27),
         frequency: Frequency.MONTHLY,
         status: BillStatus.UNPAID,
         categoryId: byName.get("Utilities")?.id,
         userId: user.id,
       },
       {
-        name: "Internet",
-        amount: 64,
+        name: "Netflix subscription",
+        amount: 95,
         dueDate: date(12),
         frequency: Frequency.MONTHLY,
         status: BillStatus.PAID,
-        categoryId: byName.get("Utilities")?.id,
+        categoryId: byName.get("Subscriptions")?.id,
         userId: user.id,
       },
     ],
@@ -211,16 +221,16 @@ async function main() {
     data: [
       {
         name: "Emergency fund",
-        targetAmount: 12000,
-        currentAmount: 7850,
+        targetAmount: 30000,
+        currentAmount: 18450,
         targetDate: date(30, 4),
         color: "#22c55e",
         userId: user.id,
       },
       {
-        name: "Japan trip",
-        targetAmount: 5200,
-        currentAmount: 2140,
+        name: "Tobago long weekend",
+        targetAmount: 8500,
+        currentAmount: 3650,
         targetDate: date(15, 8),
         color: "#06b6d4",
         userId: user.id,

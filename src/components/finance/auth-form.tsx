@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export function AuthForm({ mode }: { mode: "login" | "register" }) {
+export function AuthForm({ mode, demo = false }: { mode: "login" | "register"; demo?: boolean }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
 
@@ -52,11 +52,13 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   return (
     <Card className="glass-panel w-full max-w-md">
       <CardHeader>
-        <CardTitle>{mode === "register" ? "Create your account" : "Welcome back"}</CardTitle>
+        <CardTitle>{mode === "register" ? "Create your account" : demo ? "Try the demo workspace" : "Welcome back"}</CardTitle>
         <CardDescription>
           {mode === "register"
             ? "Start with a private workspace for your financial habits."
-            : "Use demo@financialtracks.dev and password123 after seeding."}
+            : demo
+              ? "Demo credentials are filled in so you can inspect the seeded dashboard quickly."
+              : "Log in to your private Financial Tracks workspace."}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -69,14 +71,28 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
           ) : null}
           <div className="flex flex-col gap-2">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" name="email" type="email" required placeholder="demo@financialtracks.dev" />
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              required
+              placeholder="demo@financialtracks.dev"
+              defaultValue={demo ? "demo@financialtracks.dev" : ""}
+            />
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="password">Password</Label>
-            <Input id="password" name="password" type="password" required placeholder="password123" />
+            <Input
+              id="password"
+              name="password"
+              type="password"
+              required
+              placeholder="password123"
+              defaultValue={demo ? "password123" : ""}
+            />
           </div>
           <Button type="submit" disabled={pending}>
-            {pending ? "Please wait..." : mode === "register" ? "Create account" : "Log in"}
+            {pending ? "Please wait..." : mode === "register" ? "Create account" : demo ? "Open demo dashboard" : "Log in"}
           </Button>
         </form>
         <p className="mt-5 text-center text-sm text-muted-foreground">
