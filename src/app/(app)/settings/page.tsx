@@ -1,7 +1,10 @@
+import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
 import { CurrencySettings } from "@/components/finance/currency-settings";
+import { DeleteAccountControl } from "@/components/finance/delete-account-control";
 import { PageHeader } from "@/components/finance/page-header";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { requireUser } from "@/lib/auth";
@@ -27,6 +30,18 @@ export default async function SettingsPage() {
       <CurrencySettings initialCurrency={user.currencyCode} />
       <Card className="glass-panel">
         <CardHeader>
+          <CardTitle>Privacy and data controls</CardTitle>
+          <CardDescription>Review what Cash Compass stores and control your account data.</CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="text-sm text-muted-foreground">
+            The privacy notice explains stored account data, finance records, CSV imports, Vercel Analytics, and deletion controls.
+          </div>
+          <Button variant="outline" render={<Link href="/privacy" />}>View privacy notice</Button>
+        </CardContent>
+      </Card>
+      <Card className="glass-panel">
+        <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <ShieldCheck className="size-5 text-primary" />
             Security model
@@ -40,6 +55,18 @@ export default async function SettingsPage() {
               <p className="mt-3 font-medium">{item}</p>
             </div>
           ))}
+        </CardContent>
+      </Card>
+      <Card className="glass-panel border-destructive/30">
+        <CardHeader>
+          <CardTitle>Danger zone</CardTitle>
+          <CardDescription>Permanently delete this account and all app data associated with it.</CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-muted-foreground">
+            Deletion is user-scoped, requires confirmation, clears your session, and cannot be undone.
+          </p>
+          <DeleteAccountControl />
         </CardContent>
       </Card>
     </div>

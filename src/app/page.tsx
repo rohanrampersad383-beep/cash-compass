@@ -155,6 +155,9 @@ export default function LandingPage() {
               <p className="mt-4 text-muted-foreground">
                 Cash Compass keeps imports manual and transparent. No bank login details are stored, and CSV rows are saved only after you preview and confirm them.
               </p>
+              <Link href="/privacy" className={cn(buttonVariants({ variant: "outline" }), "mt-6")}>
+                Read privacy notice
+              </Link>
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
               {["No bank credentials stored", "Manual CSV control", "Hashed passwords", "User-scoped PostgreSQL data", "Secure Vercel deployment"].map((item) => (
