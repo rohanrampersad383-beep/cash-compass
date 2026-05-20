@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { BillStatus, Frequency, PaymentType, TransactionKind } from "@/generated/prisma/client";
+import { BillStatus, CategoryType, Frequency, PaymentType, TransactionKind } from "@/generated/prisma/client";
+import { supportedCurrencyCodes } from "@/lib/finance";
 
 const money = z.coerce.number().positive("Enter an amount greater than zero").max(1_000_000);
 const dateString = z.string().min(1, "Choose a date").transform((value) => new Date(value));
@@ -64,6 +65,20 @@ export const savingsGoalSchema = z.object({
   color: z.string().trim().regex(/^#[0-9A-Fa-f]{6}$/).default("#22c55e"),
 });
 
+export const budgetSchema = z.object({
+  name: z.string().trim().min(2).max(120),
+  limitAmount: money,
+  categoryId: z.string().min(1, "Choose a category"),
+  period: z.nativeEnum(Frequency).default(Frequency.MONTHLY),
+});
+
 export const settingsSchema = z.object({
-  currencyCode: z.enum(["TTD", "USD"]),
+  currencyCode: z.enum(supportedCurrencyCodes),
+});
+
+export const categorySchema = z.object({
+  name: z.string().trim().min(2, "Use at least 2 characters").max(48),
+  type: z.nativeEnum(CategoryType),
+  color: z.string().trim().regex(/^#[0-9A-Fa-f]{6}$/).default("#14b8a6"),
+  icon: z.string().trim().max(32).optional().default("tag"),
 });

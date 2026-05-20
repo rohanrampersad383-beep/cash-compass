@@ -1,4 +1,4 @@
-import { TransactionKind } from "@/generated/prisma/client";
+import { CategoryType, TransactionKind } from "@/generated/prisma/client";
 import { NextResponse } from "next/server";
 import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -12,12 +12,22 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Invalid expense" }, { status: 400 });
   }
 
+  const category = parsed.data.categoryId
+    ? await prisma.category.findFirst({
+        where: { id: parsed.data.categoryId, userId: user.id, type: CategoryType.EXPENSE },
+      })
+    : null;
+
+  if (parsed.data.categoryId && !category) {
+    return NextResponse.json({ error: "Choose a valid expense category." }, { status: 400 });
+  }
+
   const expense = await prisma.$transaction(async (tx) => {
     const created = await tx.expense.create({
       data: {
         ...parsed.data,
         userId: user.id,
-        categoryId: parsed.data.categoryId || null,
+        categoryId: category?.id ?? null,
         notes: parsed.data.notes || null,
       },
     });
@@ -31,7 +41,7 @@ export async function POST(request: Request) {
         notes: parsed.data.notes || null,
         paymentType: parsed.data.paymentType,
         isRecurring: parsed.data.isRecurring,
-        categoryId: parsed.data.categoryId || null,
+        categoryId: category?.id ?? null,
         userId: user.id,
       },
     });

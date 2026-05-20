@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { AppProviders } from "@/components/providers/app-providers";
@@ -14,8 +15,16 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Financial Tracks",
-  description: "A polished personal finance tracker and assistant.",
+  title: {
+    default: "Cash Compass",
+    template: "%s | Cash Compass",
+  },
+  description: "A polished personal finance tracker and rule-based money guide for spending, bills, goals, budgets, and CSV imports.",
+  icons: {
+    icon: "/favicon.png",
+    shortcut: "/favicon.png",
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export default function RootLayout({
@@ -32,6 +41,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <AppProviders>{children}</AppProviders>
+        <Analytics />
       </body>
     </html>
   );

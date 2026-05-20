@@ -15,7 +15,7 @@ export default async function BillsPage() {
     <div className="grid gap-6">
       <PageHeader title="Bills" description="Keep rent, subscriptions, utilities, and payment status visible." />
       <BillForm categories={data.categories.filter((category) => category.type === CategoryType.BILL)} />
-      <BillsList bills={data.bills} currencyCode={currencyCode} />
+      <BillsList bills={data.bills} categories={data.categories.filter((category) => category.type === CategoryType.BILL)} currencyCode={currencyCode} />
     </div>
   );
 }

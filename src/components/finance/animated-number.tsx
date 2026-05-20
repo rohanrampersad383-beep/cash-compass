@@ -2,23 +2,26 @@
 
 import { animate, useInView, useMotionValue, useTransform } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+import { currency, type CurrencyCode } from "@/lib/finance";
 
 export function AnimatedNumber({
   value,
   prefix = "",
   suffix = "",
+  currencyCode,
 }: {
   value: number;
   prefix?: string;
   suffix?: string;
+  currencyCode?: CurrencyCode;
 }) {
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, margin: "-20px" });
   const motionValue = useMotionValue(0);
   const rounded = useTransform(motionValue, (latest) =>
-    `${prefix}${Math.round(latest).toLocaleString("en-US")}${suffix}`,
+    currencyCode ? currency(latest, currencyCode) : `${prefix}${Math.round(latest).toLocaleString("en-US")}${suffix}`,
   );
-  const [display, setDisplay] = useState(`${prefix}0${suffix}`);
+  const [display, setDisplay] = useState(currencyCode ? currency(0, currencyCode) : `${prefix}0${suffix}`);
 
   useEffect(() => rounded.on("change", setDisplay), [rounded]);
 

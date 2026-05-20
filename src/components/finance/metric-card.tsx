@@ -27,8 +27,9 @@ export function MetricCard({
   };
 
   return (
-    <Card className="group relative overflow-hidden glass-panel animate-in fade-in-0 slide-in-from-bottom-3 duration-500 transition hover:-translate-y-1 hover:border-primary/40 hover:shadow-primary/15 focus-within:border-primary/50">
+    <Card className="group premium-glow spotlight-card relative overflow-hidden glass-panel animate-in fade-in-0 slide-in-from-bottom-2 duration-300 transition hover:-translate-y-1 hover:border-primary/45 hover:shadow-primary/10 focus-within:border-primary/50">
       <div className={cn("absolute inset-x-0 top-0 h-24 bg-gradient-to-b opacity-80", tones[tone])} />
+      <div className="absolute -right-6 -top-8 size-20 rounded-full border border-primary/16 opacity-60 transition duration-200 group-hover/card:scale-110 group-hover/card:border-primary/35" aria-hidden="true" />
       <CardHeader className="relative flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
         <div className={cn("rounded-lg border bg-background/50 p-2", tones[tone])}>
@@ -37,7 +38,7 @@ export function MetricCard({
       </CardHeader>
       <CardContent className="relative">
         <div className="text-3xl font-semibold">
-          <AnimatedNumber value={value} prefix={currencyCode === "USD" ? "$" : "TT$"} />
+          <AnimatedNumber value={value} currencyCode={currencyCode} />
         </div>
         <p className="mt-2 text-sm text-muted-foreground">{helper}</p>
       </CardContent>

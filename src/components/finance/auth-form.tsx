@@ -58,7 +58,7 @@ export function AuthForm({ mode, demo = false }: { mode: "login" | "register"; d
             ? "Start with a private workspace for your financial habits."
             : demo
               ? "Demo credentials are filled in so you can inspect the seeded dashboard quickly."
-              : "Log in to your private Financial Tracks workspace."}
+              : "Log in to your private Cash Compass workspace."}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -96,7 +96,7 @@ export function AuthForm({ mode, demo = false }: { mode: "login" | "register"; d
           </Button>
         </form>
         <p className="mt-5 text-center text-sm text-muted-foreground">
-          {mode === "register" ? "Already have an account?" : "New to Financial Tracks?"}{" "}
+          {mode === "register" ? "Already have an account?" : "New to Cash Compass?"}{" "}
           <Link className="font-medium text-primary" href={mode === "register" ? "/login" : "/register"}>
             {mode === "register" ? "Log in" : "Create one"}
           </Link>

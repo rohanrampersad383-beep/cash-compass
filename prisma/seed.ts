@@ -49,6 +49,7 @@ async function main() {
   await prisma.income.deleteMany({ where: { userId: user.id } });
   await prisma.expense.deleteMany({ where: { userId: user.id } });
   await prisma.bill.deleteMany({ where: { userId: user.id } });
+  await prisma.budget.deleteMany({ where: { userId: user.id } });
   await prisma.savingsGoal.deleteMany({ where: { userId: user.id } });
   await prisma.uploadedStatement.deleteMany({ where: { userId: user.id } });
   await prisma.category.deleteMany({ where: { userId: user.id } });
@@ -58,11 +59,15 @@ async function main() {
       ["Salary", CategoryType.INCOME, "#22c55e", "briefcase"],
       ["Freelance", CategoryType.INCOME, "#06b6d4", "sparkles"],
       ["Groceries", CategoryType.EXPENSE, "#f59e0b", "utensils"],
-      ["Housing", CategoryType.EXPENSE, "#38bdf8", "home"],
-      ["Gas & transport", CategoryType.EXPENSE, "#a78bfa", "car"],
+      ["Rent", CategoryType.EXPENSE, "#38bdf8", "home"],
+      ["Fuel", CategoryType.EXPENSE, "#a78bfa", "car"],
+      ["Entertainment", CategoryType.EXPENSE, "#f472b6", "music"],
       ["Wellness", CategoryType.EXPENSE, "#fb7185", "heart"],
       ["Subscriptions", CategoryType.BILL, "#f97316", "repeat"],
-      ["Utilities", CategoryType.BILL, "#14b8a6", "plug"],
+      ["T&TEC", CategoryType.BILL, "#14b8a6", "plug"],
+      ["WASA", CategoryType.BILL, "#0ea5e9", "droplets"],
+      ["Digicel", CategoryType.BILL, "#ef4444", "smartphone"],
+      ["bmobile", CategoryType.BILL, "#22c55e", "radio"],
     ].map(([name, type, color, icon]) =>
       prisma.category.create({
         data: {
@@ -124,12 +129,13 @@ async function main() {
 
   const expenses = [
     ["Massy Stores groceries", 820.5, 3, "Groceries", PaymentType.CARD, "Weekly groceries"],
-    ["Unipet fuel", 340, 4, "Gas & transport", PaymentType.CARD, "Car fuel"],
-    ["Rent - St. Augustine", 5200, 5, "Housing", PaymentType.BANK_TRANSFER, "Monthly apartment rent"],
+    ["Unipet fuel", 340, 4, "Fuel", PaymentType.CARD, "Car fuel"],
+    ["Rent - St. Augustine", 5200, 5, "Rent", PaymentType.BANK_TRANSFER, "Monthly apartment rent"],
     ["PriceSmart household run", 1180.75, 11, "Groceries", PaymentType.CARD, "Bulk groceries and household items"],
     ["Pharmacy and wellness", 360, 13, "Wellness", PaymentType.CARD, "Medication and personal care"],
-    ["Maxi taxi and parking", 220, 18, "Gas & transport", PaymentType.CASH, "Local transport"],
-    ["Last month rent - St. Augustine", 5200, 5, "Housing", PaymentType.BANK_TRANSFER, "Monthly apartment rent", -1],
+    ["MovieTowne night out", 410, 15, "Entertainment", PaymentType.CARD, "Dinner and movie"],
+    ["Maxi taxi and parking", 220, 18, "Fuel", PaymentType.CASH, "Local transport"],
+    ["Last month rent - St. Augustine", 5200, 5, "Rent", PaymentType.BANK_TRANSFER, "Monthly apartment rent", -1],
     ["Last month groceries", 1720, 13, "Groceries", PaymentType.CARD, "Groceries and household items", -1],
   ] as const;
 
@@ -175,7 +181,7 @@ async function main() {
         dueDate: date(23),
         frequency: Frequency.MONTHLY,
         status: BillStatus.UNPAID,
-        categoryId: byName.get("Utilities")?.id,
+        categoryId: byName.get("T&TEC")?.id,
         userId: user.id,
       },
       {
@@ -184,7 +190,16 @@ async function main() {
         dueDate: date(24),
         frequency: Frequency.MONTHLY,
         status: BillStatus.UNPAID,
-        categoryId: byName.get("Utilities")?.id,
+        categoryId: byName.get("Digicel")?.id,
+        userId: user.id,
+      },
+      {
+        name: "bmobile home internet",
+        amount: 315,
+        dueDate: date(21),
+        frequency: Frequency.MONTHLY,
+        status: BillStatus.UNPAID,
+        categoryId: byName.get("bmobile")?.id,
         userId: user.id,
       },
       {
@@ -193,7 +208,7 @@ async function main() {
         dueDate: date(1, 1),
         frequency: Frequency.MONTHLY,
         status: BillStatus.UNPAID,
-        categoryId: byName.get("Housing")?.id,
+        categoryId: byName.get("Rent")?.id,
         userId: user.id,
       },
       {
@@ -202,7 +217,16 @@ async function main() {
         dueDate: date(27),
         frequency: Frequency.MONTHLY,
         status: BillStatus.UNPAID,
-        categoryId: byName.get("Utilities")?.id,
+        categoryId: byName.get("WASA")?.id,
+        userId: user.id,
+      },
+      {
+        name: "WASA water",
+        amount: 150,
+        dueDate: date(27, -1),
+        frequency: Frequency.MONTHLY,
+        status: BillStatus.PAID,
+        categoryId: byName.get("WASA")?.id,
         userId: user.id,
       },
       {
@@ -212,6 +236,41 @@ async function main() {
         frequency: Frequency.MONTHLY,
         status: BillStatus.PAID,
         categoryId: byName.get("Subscriptions")?.id,
+        userId: user.id,
+      },
+    ],
+  });
+
+  await prisma.budget.createMany({
+    data: [
+      {
+        name: "Groceries",
+        limitAmount: 2800,
+        categoryId: byName.get("Groceries")?.id,
+        userId: user.id,
+      },
+      {
+        name: "Utilities",
+        limitAmount: 1200,
+        categoryId: byName.get("T&TEC")?.id,
+        userId: user.id,
+      },
+      {
+        name: "Transport/Fuel",
+        limitAmount: 900,
+        categoryId: byName.get("Fuel")?.id,
+        userId: user.id,
+      },
+      {
+        name: "Subscriptions",
+        limitAmount: 350,
+        categoryId: byName.get("Subscriptions")?.id,
+        userId: user.id,
+      },
+      {
+        name: "Rent/Housing",
+        limitAmount: 5400,
+        categoryId: byName.get("Rent")?.id,
         userId: user.id,
       },
     ],

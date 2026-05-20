@@ -104,7 +104,7 @@ export function CsvUpload({ currencyCode = "TTD" }: { currencyCode?: CurrencyCod
         <UploadCloud data-icon="inline-start" />
         <AlertTitle>You control the upload</AlertTitle>
         <AlertDescription>
-          Financial Tracks never asks for bank login details. CSV files are parsed in your browser for preview, then only the rows you confirm are saved.
+          Cash Compass never asks for bank login details. CSV files are parsed in your browser for preview, then only the rows you confirm are saved.
         </AlertDescription>
       </Alert>
       <Card className="glass-panel">

@@ -39,7 +39,7 @@ export function CurrencySettings({ initialCurrency }: { initialCurrency: string 
     <Card className="glass-panel">
       <CardHeader>
         <CardTitle>Currency</CardTitle>
-        <CardDescription>Switch between Trinidad and Tobago dollars and US dollars for display.</CardDescription>
+        <CardDescription>Choose the display currency for dashboards, budgets, bills, goals, insights, and imports.</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-end">
         <div className="flex flex-1 flex-col gap-2">

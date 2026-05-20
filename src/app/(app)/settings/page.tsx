@@ -12,7 +12,7 @@ export default async function SettingsPage() {
 
   return (
     <div className="grid gap-6">
-      <PageHeader title="Settings" description="Account, privacy, and workspace preferences for your finance tracker." />
+      <PageHeader title="Settings" description="Account, privacy, and Cash Compass workspace preferences." />
       <Card className="glass-panel">
         <CardHeader>
           <CardTitle>Profile</CardTitle>

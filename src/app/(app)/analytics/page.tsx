@@ -9,8 +9,9 @@ export default async function AnalyticsPage() {
   const user = await requireUser();
   const data = await getFinanceData(user.id);
   const currencyCode = normalizeCurrency(user.currencyCode);
-  const summary = buildFinanceSummary(data);
-  const monthlyData = monthlyChartData(data.transactions);
+  const ledgerData = { ...data, transactions: data.ledgerTransactions };
+  const summary = buildFinanceSummary(ledgerData);
+  const monthlyData = monthlyChartData(data.ledgerTransactions);
 
   return (
     <div className="grid gap-6">

@@ -1,12 +1,47 @@
-import { BillStatus, TransactionKind } from "@/generated/prisma/browser";
+import { BillStatus, Frequency, TransactionKind } from "@/generated/prisma/browser";
 
 export type MoneyLike = { toNumber?: () => number } | number | string;
-export type CurrencyCode = "TTD" | "USD";
 
-export const supportedCurrencies = [
+export const supportedCurrencyCodes = [
+  "TTD",
+  "USD",
+  "EUR",
+  "GBP",
+  "CAD",
+  "AUD",
+  "NZD",
+  "JPY",
+  "CNY",
+  "INR",
+  "SGD",
+  "AED",
+  "ZAR",
+  "JMD",
+  "BBD",
+  "XCD",
+] as const;
+export type CurrencyCode = (typeof supportedCurrencyCodes)[number];
+
+export const supportedCurrencies: { code: CurrencyCode; label: string; locale: string }[] = [
   { code: "TTD", label: "Trinidad and Tobago dollar", locale: "en-TT" },
   { code: "USD", label: "US dollar", locale: "en-US" },
-] as const;
+  { code: "EUR", label: "Euro", locale: "en-IE" },
+  { code: "GBP", label: "British pound", locale: "en-GB" },
+  { code: "CAD", label: "Canadian dollar", locale: "en-CA" },
+  { code: "AUD", label: "Australian dollar", locale: "en-AU" },
+  { code: "NZD", label: "New Zealand dollar", locale: "en-NZ" },
+  { code: "JPY", label: "Japanese yen", locale: "ja-JP" },
+  { code: "CNY", label: "Chinese yuan", locale: "zh-CN" },
+  { code: "INR", label: "Indian rupee", locale: "en-IN" },
+  { code: "SGD", label: "Singapore dollar", locale: "en-SG" },
+  { code: "AED", label: "UAE dirham", locale: "en-AE" },
+  { code: "ZAR", label: "South African rand", locale: "en-ZA" },
+  { code: "JMD", label: "Jamaican dollar", locale: "en-JM" },
+  { code: "BBD", label: "Barbadian dollar", locale: "en-BB" },
+  { code: "XCD", label: "East Caribbean dollar", locale: "en-AG" },
+];
+
+const currencyMeta = new Map(supportedCurrencies.map((item) => [item.code, item]));
 
 export function toNumber(value: MoneyLike) {
   if (typeof value === "number") {
@@ -21,11 +56,11 @@ export function toNumber(value: MoneyLike) {
 }
 
 export function normalizeCurrency(value?: string | null): CurrencyCode {
-  return value === "USD" ? "USD" : "TTD";
+  return supportedCurrencyCodes.includes(value as CurrencyCode) ? (value as CurrencyCode) : "TTD";
 }
 
 export function currency(value: number, currencyCode: CurrencyCode = "TTD") {
-  const locale = currencyCode === "USD" ? "en-US" : "en-TT";
+  const locale = currencyMeta.get(currencyCode)?.locale ?? "en-TT";
 
   return new Intl.NumberFormat(locale, {
     style: "currency",
@@ -35,7 +70,7 @@ export function currency(value: number, currencyCode: CurrencyCode = "TTD") {
 }
 
 export function compactCurrency(value: number, currencyCode: CurrencyCode = "TTD") {
-  const locale = currencyCode === "USD" ? "en-US" : "en-TT";
+  const locale = currencyMeta.get(currencyCode)?.locale ?? "en-TT";
 
   return new Intl.NumberFormat(locale, {
     style: "currency",
@@ -72,9 +107,9 @@ export function buildFinanceSummary({
     amount: MoneyLike;
     date: Date;
     kind: TransactionKind;
-    category?: { name: string; color: string } | null;
+    category?: { id?: string; name: string; color: string } | null;
   }[];
-  bills: { id: string; amount: MoneyLike; dueDate: Date; status: BillStatus; name: string; category?: { name: string } | null }[];
+  bills: { id: string; amount: MoneyLike; dueDate: Date; frequency: Frequency; status: BillStatus; name: string; categoryId?: string | null; category?: { id?: string; name: string; color?: string; icon?: string; type?: unknown } | null }[];
   goals: { id: string; targetAmount: MoneyLike; currentAmount: MoneyLike; name: string }[];
 }) {
   const now = new Date();
@@ -136,6 +171,97 @@ export function buildFinanceSummary({
     expenseDelta,
     upcomingBills,
     goalProgress,
+  };
+}
+
+export type BudgetHealth = "Safe" | "Watch" | "Over Budget";
+
+export function budgetHealth(percentUsed: number): BudgetHealth {
+  if (percentUsed >= 100) {
+    return "Over Budget";
+  }
+
+  if (percentUsed >= 80) {
+    return "Watch";
+  }
+
+  return "Safe";
+}
+
+export function buildBudgetSummary({
+  budgets,
+  transactions,
+  bills,
+}: {
+  budgets: {
+    id: string;
+    name: string;
+    limitAmount: MoneyLike;
+    period: Frequency;
+    categoryId?: string | null;
+    category?: { id: string; name: string; color: string; icon?: string; type?: unknown } | null;
+  }[];
+  transactions: {
+    amount: MoneyLike;
+    date: Date;
+    kind: TransactionKind;
+    categoryId?: string | null;
+  }[];
+  bills: {
+    amount: MoneyLike;
+    dueDate: Date;
+    categoryId?: string | null;
+  }[];
+}) {
+  const now = new Date();
+  const monthStart = startOfMonth(now);
+  const monthEnd = endOfMonth(now);
+  const inCurrentMonth = (date: Date) => date >= monthStart && date <= monthEnd;
+
+  const items = budgets.map((budget) => {
+    const spentFromTransactions = sum(
+      transactions
+        .filter(
+          (transaction) =>
+            transaction.kind === TransactionKind.EXPENSE &&
+            transaction.categoryId === budget.categoryId &&
+            inCurrentMonth(transaction.date),
+        )
+        .map((transaction) => transaction.amount),
+    );
+    const reservedFromBills = sum(
+      bills
+        .filter((bill) => bill.categoryId === budget.categoryId && inCurrentMonth(bill.dueDate))
+        .map((bill) => bill.amount),
+    );
+    const limit = toNumber(budget.limitAmount);
+    const spent = spentFromTransactions + reservedFromBills;
+    const percentUsed = limit > 0 ? Math.min(140, (spent / limit) * 100) : 0;
+
+    return {
+      ...budget,
+      limit,
+      spent,
+      remaining: limit - spent,
+      percentUsed,
+      health: budgetHealth(percentUsed),
+    };
+  });
+
+  const totalLimit = sum(items.map((item) => item.limit));
+  const totalSpent = sum(items.map((item) => item.spent));
+  const overCount = items.filter((item) => item.health === "Over Budget").length;
+  const watchCount = items.filter((item) => item.health === "Watch").length;
+
+  return {
+    items,
+    totalLimit,
+    totalSpent,
+    totalRemaining: totalLimit - totalSpent,
+    percentUsed: totalLimit > 0 ? (totalSpent / totalLimit) * 100 : 0,
+    overCount,
+    watchCount,
+    status: overCount > 0 ? "Over Budget" : watchCount > 0 ? "Watch" : "Safe",
   };
 }
 
