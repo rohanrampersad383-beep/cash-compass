@@ -1,9 +1,15 @@
 import { NextResponse } from "next/server";
 import { createUserSession, verifyPassword } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { rateLimit, rateLimitPresets } from "@/lib/rate-limit";
 import { loginSchema } from "@/lib/validations";
 
 export async function POST(request: Request) {
+  const limited = rateLimit(request, rateLimitPresets.login);
+  if (limited) {
+    return limited;
+  }
+
   const body = await request.json();
   const parsed = loginSchema.safeParse(body);
 

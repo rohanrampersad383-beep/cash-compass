@@ -2,9 +2,15 @@ import { Prisma } from "@/generated/prisma/client";
 import { NextResponse } from "next/server";
 import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { rateLimit, rateLimitPresets } from "@/lib/rate-limit";
 import { categorySchema } from "@/lib/validations";
 
 export async function POST(request: Request) {
+  const limited = rateLimit(request, rateLimitPresets.financeMutation);
+  if (limited) {
+    return limited;
+  }
+
   const user = await requireUser();
   const parsed = categorySchema.safeParse(await request.json());
 

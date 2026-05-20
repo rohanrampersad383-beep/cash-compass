@@ -1,9 +1,15 @@
 import { NextResponse } from "next/server";
 import { createUserSession, hashPassword } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { rateLimit, rateLimitPresets } from "@/lib/rate-limit";
 import { registerSchema } from "@/lib/validations";
 
 export async function POST(request: Request) {
+  const limited = rateLimit(request, rateLimitPresets.register);
+  if (limited) {
+    return limited;
+  }
+
   const body = await request.json();
   const parsed = registerSchema.safeParse(body);
 

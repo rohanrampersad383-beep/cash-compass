@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { rateLimit, rateLimitPresets } from "@/lib/rate-limit";
 
 const importRowSchema = z.object({
   title: z.string().trim().min(1).max(120),
@@ -19,6 +20,11 @@ const importSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  const limited = rateLimit(request, rateLimitPresets.csvUpload);
+  if (limited) {
+    return limited;
+  }
+
   const user = await requireUser();
   const parsed = importSchema.safeParse(await request.json());
 

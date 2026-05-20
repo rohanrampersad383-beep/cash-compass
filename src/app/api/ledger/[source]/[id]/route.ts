@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { CategoryType, PaymentType, TransactionKind } from "@/generated/prisma/client";
 import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { rateLimit, rateLimitPresets } from "@/lib/rate-limit";
 import { transactionSchema } from "@/lib/validations";
 
 type LedgerSource = "transaction" | "income" | "expense";
@@ -28,6 +29,11 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ source: string; id: string }> },
 ) {
+  const limited = rateLimit(request, rateLimitPresets.financeMutation);
+  if (limited) {
+    return limited;
+  }
+
   const user = await requireUser();
   const { source, id } = await params;
 
@@ -118,9 +124,14 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ source: string; id: string }> },
 ) {
+  const limited = rateLimit(request, rateLimitPresets.financeMutation);
+  if (limited) {
+    return limited;
+  }
+
   const user = await requireUser();
   const { source, id } = await params;
 
