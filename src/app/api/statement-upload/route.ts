@@ -2,6 +2,7 @@ import { TransactionKind } from "@/generated/prisma/client";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireUser } from "@/lib/auth";
+import { validateMutationOrigin } from "@/lib/csrf";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, rateLimitPresets } from "@/lib/rate-limit";
 
@@ -20,6 +21,11 @@ const importSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  const invalidOrigin = validateMutationOrigin(request);
+  if (invalidOrigin) {
+    return invalidOrigin;
+  }
+
   const limited = rateLimit(request, rateLimitPresets.csvUpload);
   if (limited) {
     return limited;

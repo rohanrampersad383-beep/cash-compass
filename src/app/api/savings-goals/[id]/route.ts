@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireUser } from "@/lib/auth";
+import { validateMutationOrigin } from "@/lib/csrf";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, rateLimitPresets } from "@/lib/rate-limit";
 import { savingsGoalSchema } from "@/lib/validations";
@@ -8,6 +9,11 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const invalidOrigin = validateMutationOrigin(request);
+  if (invalidOrigin) {
+    return invalidOrigin;
+  }
+
   const limited = rateLimit(request, rateLimitPresets.financeMutation);
   if (limited) {
     return limited;
@@ -43,6 +49,11 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const invalidOrigin = validateMutationOrigin(request);
+  if (invalidOrigin) {
+    return invalidOrigin;
+  }
+
   const limited = rateLimit(request, rateLimitPresets.financeMutation);
   if (limited) {
     return limited;

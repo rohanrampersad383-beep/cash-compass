@@ -1,10 +1,16 @@
 import { NextResponse } from "next/server";
 import { createUserSession, verifyPassword } from "@/lib/auth";
+import { validateMutationOrigin } from "@/lib/csrf";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, rateLimitPresets } from "@/lib/rate-limit";
 import { loginSchema } from "@/lib/validations";
 
 export async function POST(request: Request) {
+  const invalidOrigin = validateMutationOrigin(request);
+  if (invalidOrigin) {
+    return invalidOrigin;
+  }
+
   const limited = rateLimit(request, rateLimitPresets.login);
   if (limited) {
     return limited;
