@@ -11,6 +11,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  CSV_IMPORT_LIMITS,
+  isAllowedCsvFile,
+  isValidImportAmount,
+  normalizeCsvDate,
+  normalizeImportedText,
+  parseCsvAmount,
+} from "@/lib/csv-import";
 import { currency, type CurrencyCode } from "@/lib/finance";
 
 type PreviewRow = {
@@ -24,6 +32,8 @@ type PreviewRow = {
 export function CsvUpload({ currencyCode = "TTD" }: { currencyCode?: CurrencyCode }) {
   const router = useRouter();
   const [fileName, setFileName] = useState("");
+  const [fileSize, setFileSize] = useState(0);
+  const [fileType, setFileType] = useState("");
   const [rows, setRows] = useState<PreviewRow[]>([]);
   const [pending, setPending] = useState(false);
 
@@ -49,30 +59,77 @@ export function CsvUpload({ currencyCode = "TTD" }: { currencyCode?: CurrencyCod
       return;
     }
 
+    setRows([]);
     setFileName(file.name);
+    setFileSize(file.size);
+    setFileType(file.type);
+
+    if (file.size > CSV_IMPORT_LIMITS.maxFileSizeBytes) {
+      toast.error("CSV file is too large. Use a file under 1 MB.");
+      return;
+    }
+
+    if (!isAllowedCsvFile(file.name, file.type)) {
+      toast.error("Upload a valid CSV file.");
+      return;
+    }
+
     Papa.parse<Record<string, string>>(file, {
       header: true,
       skipEmptyLines: true,
       complete: (result) => {
-        const normalized = result.data
-          .map((row) => {
-            const rawAmount = Number(row.amount ?? row.Amount ?? row.AMOUNT ?? 0);
-            const title = row.description ?? row.Description ?? row.title ?? row.Title ?? row.merchant ?? "Imported transaction";
-            const date = row.date ?? row.Date ?? new Date().toISOString().slice(0, 10);
-            return {
-              title: String(title).replace(/[<>]/g, "").slice(0, 120),
-              amount: Math.abs(rawAmount),
-              date,
-              kind: rawAmount >= 0 ? TransactionKind.INCOME : TransactionKind.EXPENSE,
-              notes: "Imported from manual CSV upload",
-            };
-          })
-          .filter((row) => row.amount > 0 && !Number.isNaN(Date.parse(row.date)))
-          .slice(0, 100);
+        if (result.errors.length) {
+          toast.error("Could not parse this CSV. Check the header row and file format.");
+          return;
+        }
+
+        if (result.data.length > CSV_IMPORT_LIMITS.maxRows) {
+          toast.error(`CSV imports are limited to ${CSV_IMPORT_LIMITS.maxRows} rows.`);
+          return;
+        }
+
+        const normalized: PreviewRow[] = [];
+        for (const [index, row] of result.data.entries()) {
+          const rawAmount = parseCsvAmount(row.amount ?? row.Amount ?? row.AMOUNT);
+          const title = normalizeImportedText(
+            row.description ?? row.Description ?? row.title ?? row.Title ?? row.merchant,
+            120,
+          );
+          const date = normalizeCsvDate(row.date ?? row.Date);
+
+          if (!title) {
+            toast.error(`Row ${index + 1} needs a description.`);
+            return;
+          }
+
+          if (rawAmount === null || !isValidImportAmount(Math.abs(rawAmount))) {
+            toast.error(`Row ${index + 1} has an invalid amount.`);
+            return;
+          }
+
+          if (!date) {
+            toast.error(`Row ${index + 1} has an invalid date. Use YYYY-MM-DD.`);
+            return;
+          }
+
+          normalized.push({
+            title,
+            amount: Math.abs(rawAmount),
+            date,
+            kind: rawAmount >= 0 ? TransactionKind.INCOME : TransactionKind.EXPENSE,
+            notes: normalizeImportedText("Imported from manual CSV upload", 500),
+          });
+        }
+
+        if (!normalized.length) {
+          toast.error("No valid transaction rows were found.");
+          return;
+        }
+
         setRows(normalized);
         toast.success(`Previewed ${normalized.length} clean rows`);
       },
-      error: () => toast.error("Could not parse this CSV"),
+      error: () => toast.error("Could not parse this CSV. Check the file and try again."),
     });
   }
 
@@ -82,7 +139,7 @@ export function CsvUpload({ currencyCode = "TTD" }: { currencyCode?: CurrencyCod
       const response = await fetch("/api/statement-upload", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fileName, rows }),
+        body: JSON.stringify({ fileName, fileSize, fileType, rows }),
       });
       const json = await response.json();
       if (!response.ok) {
