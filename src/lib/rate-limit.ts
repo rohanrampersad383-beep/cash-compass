@@ -21,6 +21,16 @@ const store = globalForRateLimit.__cashCompassRateLimitStore ?? new Map<string, 
 globalForRateLimit.__cashCompassRateLimitStore = store;
 
 const CLEANUP_INTERVAL_MS = 60_000;
+const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL?.replace(/\/+$/, "");
+const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
+const RATE_LIMIT_SCRIPT = `
+local current = redis.call("INCR", KEYS[1])
+if current == 1 then
+  redis.call("PEXPIRE", KEYS[1], ARGV[1])
+end
+local ttl = redis.call("PTTL", KEYS[1])
+return { current, ttl }
+`;
 
 export const rateLimitPresets = {
   login: {
@@ -76,7 +86,25 @@ function cleanupExpiredBuckets(now: number) {
   globalForRateLimit.__cashCompassRateLimitCleanupAt = now + CLEANUP_INTERVAL_MS;
 }
 
-export function rateLimit(request: Request, config: RateLimitConfig): NextResponse | null {
+function rateLimitResponse(config: RateLimitConfig, retryAfterSeconds: number) {
+  return NextResponse.json(
+    {
+      error: config.message,
+      retryAfterSeconds,
+    },
+    {
+      status: 429,
+      headers: {
+        "Retry-After": String(retryAfterSeconds),
+        "X-RateLimit-Limit": String(config.limit),
+        "X-RateLimit-Remaining": "0",
+        "X-RateLimit-Reset": String(Math.ceil((Date.now() + retryAfterSeconds * 1000) / 1000)),
+      },
+    },
+  );
+}
+
+function memoryRateLimit(request: Request, config: RateLimitConfig): NextResponse | null {
   const now = Date.now();
   cleanupExpiredBuckets(now);
 
@@ -93,22 +121,55 @@ export function rateLimit(request: Request, config: RateLimitConfig): NextRespon
   const retryAfterSeconds = Math.max(Math.ceil((bucket.resetAt - now) / 1000), 1);
 
   if (bucket.count > config.limit) {
-    return NextResponse.json(
-      {
-        error: config.message,
-        retryAfterSeconds,
-      },
-      {
-        status: 429,
-        headers: {
-          "Retry-After": String(retryAfterSeconds),
-          "X-RateLimit-Limit": String(config.limit),
-          "X-RateLimit-Remaining": "0",
-          "X-RateLimit-Reset": String(Math.ceil(bucket.resetAt / 1000)),
-        },
-      },
-    );
+    return rateLimitResponse(config, retryAfterSeconds);
   }
 
   return null;
+}
+
+async function redisRateLimit(request: Request, config: RateLimitConfig): Promise<NextResponse | null> {
+  if (!UPSTASH_URL || !UPSTASH_TOKEN) {
+    return memoryRateLimit(request, config);
+  }
+
+  const ip = getClientIp(request);
+  const key = `cash-compass:${config.key}:${ip}`;
+
+  try {
+    const response = await fetch(`${UPSTASH_URL}/eval`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${UPSTASH_TOKEN}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify([RATE_LIMIT_SCRIPT, "1", key, String(config.windowMs)]),
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      return memoryRateLimit(request, config);
+    }
+
+    const payload = await response.json() as { result?: [number | string, number | string] };
+    const [rawCount, rawTtl] = payload.result ?? [];
+    const count = Number(rawCount);
+    const ttlMs = Number(rawTtl);
+
+    if (!Number.isFinite(count) || !Number.isFinite(ttlMs) || ttlMs <= 0) {
+      return memoryRateLimit(request, config);
+    }
+
+    if (count > config.limit) {
+      const retryAfterSeconds = Math.max(Math.ceil(ttlMs / 1000), 1);
+      return rateLimitResponse(config, retryAfterSeconds);
+    }
+
+    return null;
+  } catch {
+    return memoryRateLimit(request, config);
+  }
+}
+
+export async function rateLimit(request: Request, config: RateLimitConfig): Promise<NextResponse | null> {
+  return redisRateLimit(request, config);
 }

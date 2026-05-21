@@ -40,7 +40,7 @@ export async function POST(request: Request) {
     return invalidOrigin;
   }
 
-  const limited = rateLimit(request, rateLimitPresets.csvUpload);
+  const limited = await rateLimit(request, rateLimitPresets.csvUpload);
   if (limited) {
     return limited;
   }

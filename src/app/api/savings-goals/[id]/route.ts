@@ -14,7 +14,7 @@ export async function PATCH(
     return invalidOrigin;
   }
 
-  const limited = rateLimit(request, rateLimitPresets.financeMutation);
+  const limited = await rateLimit(request, rateLimitPresets.financeMutation);
   if (limited) {
     return limited;
   }
@@ -54,7 +54,7 @@ export async function DELETE(
     return invalidOrigin;
   }
 
-  const limited = rateLimit(request, rateLimitPresets.financeMutation);
+  const limited = await rateLimit(request, rateLimitPresets.financeMutation);
   if (limited) {
     return limited;
   }

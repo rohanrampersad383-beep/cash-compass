@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     return invalidOrigin;
   }
 
-  const limited = rateLimit(request, rateLimitPresets.register);
+  const limited = await rateLimit(request, rateLimitPresets.register);
   if (limited) {
     return limited;
   }

@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     return invalidOrigin;
   }
 
-  const limited = rateLimit(request, rateLimitPresets.financeMutation);
+  const limited = await rateLimit(request, rateLimitPresets.financeMutation);
   if (limited) {
     return limited;
   }
