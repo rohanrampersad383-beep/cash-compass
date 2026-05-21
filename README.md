@@ -1,48 +1,215 @@
 # Cash Compass
 
-Cash Compass is a full-stack personal finance tracker and rule-based financial guide built with Next.js, TypeScript, Tailwind CSS, shadcn/ui, Prisma, PostgreSQL, Recharts, Framer Motion, and Anime.js.
+Cash Compass is a full-stack personal finance tracking web application designed to help users monitor income, expenses, bills, budgets, savings goals, uploaded CSV statements, and transaction activity through a polished dashboard. It includes authentication, protected routes, a seeded demo workspace, finance analytics, currency preferences, and privacy-conscious manual CSV import.
 
-## Setup
+## Live Demo
 
-```bash
-npm install
-copy .env.example .env
-```
+Live app: [https://cash-compass-finance.vercel.app](https://cash-compass-finance.vercel.app)
 
-Update `DATABASE_URL` in `.env` with a PostgreSQL connection string.
+## Demo Workspace
 
-## Database
-
-```bash
-npm run prisma:generate
-npm run db:migrate -- --name init
-npm run db:seed
-```
-
-The seed creates:
+Use the seeded demo workspace to review the product with sample data:
 
 - Email: `demo@financialtracks.dev`
 - Password: `password123`
 
-## Run
+This account is seeded with Trinidad and Tobago-style sample data, including salary, freelance income, groceries, fuel, rent, T&TEC, WASA, Digicel, bmobile, budgets, savings goals, and transaction history.
+
+For production-like documentation, a stronger demo password would be preferable. The seed password is intentionally unchanged for this portfolio demo batch.
+
+## Project Overview
+
+Cash Compass is a SaaS-style personal finance tracker built as a portfolio project. It focuses on beginner-friendly money visibility instead of accounting complexity. Users can track everyday finance records, inspect spending patterns, manage budgets and bills, upload CSV statements manually, and review rule-based financial insights in a responsive dark fintech interface.
+
+## Key Features
+
+- Public landing page with product positioning, dashboard preview, and privacy messaging
+- Register/login authentication with protected app routes
+- Seeded demo workspace with realistic sample finance data
+- Protected dashboard with balance, income, expenses, savings, bills, goals, budgets, and insights
+- Income and expense tracking through a unified transaction workflow
+- Bills management with due dates, frequency, category, and paid/unpaid status
+- Budgets management with monthly limits, remaining amounts, and health states
+- Savings goals with progress tracking and milestone-style feedback
+- Unified transaction ledger with search, filters, tabs, edit/delete controls, and quick actions
+- Custom category creation with user-scoped category persistence
+- CSV/bank statement upload with preview before import
+- Currency preference support for TTD, USD, EUR, GBP, CAD, AUD, NZD, JPY, CNY, INR, SGD, AED, ZAR, JMD, BBD, and XCD
+- Charts and analytics for income vs expenses, savings trends, and spending by category
+- Rule-based finance assistant with smart demo insights and recommendations
+- Settings and preferences for currency, session controls, privacy notice, and account deletion
+- Privacy notice and security-focused product copy
+- Responsive desktop/mobile layout with a polished dark fintech UI
+
+## Screenshots
+
+No committed screenshots are currently included in the repository. A placeholder folder is available at [`docs/screenshots`](docs/screenshots) with the recommended capture list.
+
+Suggested screenshots to add:
+
+- Landing page
+- Demo login
+- Dashboard
+- Transactions ledger
+- CSV upload preview
+- Analytics or Cash Compass Assistant
+- Mobile dashboard
+
+## Tech Stack
+
+- Next.js App Router
+- TypeScript
+- Tailwind CSS
+- shadcn/ui and Base UI primitives
+- Prisma 7
+- Neon PostgreSQL
+- Prisma Neon adapter and Neon serverless driver
+- bcrypt password hashing
+- HTTP-only cookies for sessions
+- Recharts
+- Framer Motion / Motion for React
+- Anime.js for the compass animation motif
+- Vercel deployment
+- Vercel Analytics
+- Vercel Speed Insights
+- Upstash Redis-backed rate limiting when configured, with local in-memory fallback
+
+## Architecture Overview
+
+- `src/app` contains the Next.js App Router pages, route groups, metadata, and API routes.
+- Public pages include the landing page and privacy notice.
+- Protected app pages live under `src/app/(app)` and are wrapped by a server-side layout that requires an authenticated user.
+- API mutation routes live under `src/app/api` and handle auth, finance records, CSV imports, settings, sessions, and account deletion.
+- Prisma models define users, sessions, categories, transactions, income, expenses, bills, budgets, savings goals, and uploaded statements.
+- Neon PostgreSQL stores the application data.
+- `src/lib/data.ts` centralizes finance data loading with user-scoped Prisma queries.
+- `src/lib/finance.ts` contains summary, budget, chart, currency, and calculation helpers.
+- CSV import uses a browser preview flow and a server-side confirmation route before rows are stored.
+- The production app is deployed on Vercel and uses environment variables for database and optional distributed rate limiting.
+
+## Security & Privacy Highlights
+
+Implemented security and privacy controls include:
+
+- bcrypt password hashing
+- HTTP-only session cookie named `cash_compass_session`
+- session token hashing before database storage
+- protected dashboard routes via server-side user checks
+- user-scoped Prisma queries for finance data isolation
+- CSRF/origin checks for state-changing API routes
+- rate limiting for login, registration, CSV upload, and finance mutations
+- CSP and security headers in `next.config.ts`
+- logout current session and logout all sessions controls
+- account deletion flow that removes user-scoped app data
+- manual CSV upload instead of direct bank login
+- CSV validation, row limits, file size limits, and spreadsheet formula-injection neutralization
+- privacy notice describing stored data, analytics usage, CSV imports, and account deletion controls
+
+Cash Compass is still a portfolio V1. Use sample/test data while the app continues to improve.
+
+## CSV Upload Safety
+
+The statement upload flow is intentionally manual and user-controlled:
+
+- Users choose a CSV file themselves.
+- CSV rows are previewed before import.
+- Only confirmed rows are saved.
+- No bank credentials are requested or stored.
+- Server-side validation enforces file size, payload size, row count, date format, and amount limits.
+- Imported text is trimmed, normalized, length-limited, and neutralized if it starts with spreadsheet formula characters such as `=`, `+`, `-`, or `@`.
+- Parser/internal errors are converted into clean user-facing API errors.
+
+## Local Development Setup
 
 ```bash
+npm install
+copy .env.example .env
+npm run prisma:generate
+npm run db:migrate -- --name init
+npm run db:seed
 npm run dev
 ```
 
-Open `http://localhost:3000`.
+Open [http://localhost:3000](http://localhost:3000).
 
-## CSV Import
+If the database schema already exists and you only need to sync the Prisma client, run:
 
-A sample statement is available at `public/sample-statement.csv`. The upload page previews rows before saving and never asks for bank credentials.
+```bash
+npm run prisma:generate
+```
 
-## Budgets
+## Environment Variables
 
-Budgets are backed by Prisma and compare monthly category limits against current expenses plus bill reserves for the same category.
+Use `.env.example` as the safe template. Do not commit real secrets.
 
-## Branding
+Required:
 
-Current Cash Compass logo and favicon assets live in `public/cash-compass-logo.png`, `public/cash-compass-wordmark.png`, `public/cash-compass-icon.png`, `public/favicon.png`, and `public/apple-touch-icon.png`. These can be replaced with final brand artwork without renaming database tables or internal folders.
+- `DATABASE_URL` - pooled Neon/PostgreSQL connection string used by the Next.js app and seed runtime
+
+Optional:
+
+- `DIRECT_URL` - direct Neon/PostgreSQL connection string for Prisma migrations/introspection
+- `UPSTASH_REDIS_REST_URL` - Upstash Redis REST URL for distributed rate limiting
+- `UPSTASH_REDIS_REST_TOKEN` - Upstash Redis REST token for distributed rate limiting
+
+## Database / Prisma Notes
+
+- Prisma schema: `prisma/schema.prisma`
+- Prisma config: `prisma.config.ts`
+- Seed script: `prisma/seed.ts`
+- Generated Prisma client output: `src/generated/prisma`
+- Local Prisma generation: `npm run prisma:generate`
+- Local migration script: `npm run db:migrate`
+- Demo data seed: `npm run db:seed`
+
+The app uses Prisma 7 with the Neon adapter. The seed script creates the demo workspace and resets only that demo user's seeded finance data before inserting fresh sample records.
+
+## Deployment
+
+The app is deployed on Vercel:
+
+[https://cash-compass-finance.vercel.app](https://cash-compass-finance.vercel.app)
+
+Production requires `DATABASE_URL` in Vercel environment variables. `DIRECT_URL` is useful for Prisma migration workflows. Upstash Redis environment variables are optional but recommended for distributed production rate limiting.
+
+Vercel Analytics and Speed Insights are installed in the root App Router layout.
+
+## Project Status
+
+Current status: deployed portfolio project / V1.
+
+Core finance tracking flows are complete:
+
+- authentication and protected routes
+- dashboard summaries
+- transactions ledger
+- income and expense tracking
+- bills, budgets, and savings goals
+- CSV import preview and confirmation
+- analytics and rule-based assistant
+- settings, currency preferences, privacy notice, and account deletion
+
+Some product-level improvements remain before treating it as a production financial application for sensitive real data.
+
+## Future Improvements
+
+- Category edit/delete management
+- CSV column mapping and category assignment during import
+- Password reset and email verification
+- Data export/download
+- More automated tests for auth, finance calculations, CSV validation, and API authorization
+- Real AI assistant integration later
+- Budget alerts and notifications later
+- More onboarding guidance for newly registered users
+
+## Recruiter Highlights
+
+- Built a full-stack finance SaaS-style app with Next.js, TypeScript, Prisma, Neon PostgreSQL, and Vercel
+- Implemented custom authentication/session handling with bcrypt, hashed session tokens, and HTTP-only cookies
+- Built a unified finance ledger covering income, expenses, bills, budgets, savings goals, custom categories, and CSV imports
+- Added privacy-conscious CSV upload with preview, server validation, row limits, and formula-injection hardening
+- Added security hardening with CSRF/origin checks, rate limiting, CSP/security headers, logout-all-sessions, and account deletion
+- Designed a responsive fintech UI with charts, analytics, motion, branded assets, and realistic demo data
 
 ## Quality Checks
 
