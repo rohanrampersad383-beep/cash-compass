@@ -85,3 +85,5 @@ export const categorySchema = z.object({
   color: z.string().trim().regex(/^#[0-9A-Fa-f]{6}$/).default("#14b8a6"),
   icon: z.string().trim().max(32).optional().default("tag"),
 });
+
+export const categoryUpdateSchema = categorySchema.omit({ type: true });

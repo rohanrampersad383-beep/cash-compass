@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
+import { CategoryManagement } from "@/components/finance/category-management";
 import { CurrencySettings } from "@/components/finance/currency-settings";
 import { DeleteAccountControl } from "@/components/finance/delete-account-control";
 import { LogoutAllSessionsControl } from "@/components/finance/logout-all-sessions-control";
@@ -10,9 +11,30 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { requireUser } from "@/lib/auth";
 import { normalizeCurrency } from "@/lib/finance";
+import { prisma } from "@/lib/prisma";
 
 export default async function SettingsPage() {
   const user = await requireUser();
+  const categories = await prisma.category.findMany({
+    where: { userId: user.id },
+    orderBy: [{ type: "asc" }, { name: "asc" }],
+    select: {
+      id: true,
+      name: true,
+      type: true,
+      color: true,
+      icon: true,
+      _count: {
+        select: {
+          transactions: true,
+          incomes: true,
+          expenses: true,
+          bills: true,
+          budgets: true,
+        },
+      },
+    },
+  });
 
   return (
     <div className="grid gap-6">
@@ -29,6 +51,21 @@ export default async function SettingsPage() {
         </CardContent>
       </Card>
       <CurrencySettings initialCurrency={user.currencyCode} />
+      <CategoryManagement
+        categories={categories.map((category) => ({
+          id: category.id,
+          name: category.name,
+          type: category.type,
+          color: category.color,
+          icon: category.icon,
+          usageCount:
+            category._count.transactions +
+            category._count.incomes +
+            category._count.expenses +
+            category._count.bills +
+            category._count.budgets,
+        }))}
+      />
       <Card className="glass-panel">
         <CardHeader>
           <CardTitle>Privacy and data controls</CardTitle>

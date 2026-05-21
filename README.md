@@ -32,7 +32,7 @@ Cash Compass is a SaaS-style personal finance tracker built as a portfolio proje
 - Budgets management with monthly limits, remaining amounts, and health states
 - Savings goals with progress tracking and milestone-style feedback
 - Unified transaction ledger with search, filters, tabs, edit/delete controls, and quick actions
-- Custom category creation with user-scoped category persistence
+- Custom category creation and Settings-based category management with safe edit/delete controls
 - CSV/bank statement upload with preview before import
 - Currency preference support for TTD, USD, EUR, GBP, CAD, AUD, NZD, JPY, CNY, INR, SGD, AED, ZAR, JMD, BBD, and XCD
 - Charts and analytics for income vs expenses, savings trends, and spending by category
@@ -205,7 +205,6 @@ Some product-level improvements remain before treating it as a production financ
 
 ## Future Improvements
 
-- Category edit/delete management
 - CSV column mapping and category assignment during import
 - Password reset and email verification
 - Data export/download
