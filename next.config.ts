@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const isProduction = process.env.NODE_ENV === "production";
+const projectRoot = process.cwd();
 
 const contentSecurityPolicy = [
   "default-src 'self'",
@@ -52,6 +53,10 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  outputFileTracingRoot: projectRoot,
+  turbopack: {
+    root: projectRoot,
+  },
   async headers() {
     return [
       {
