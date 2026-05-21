@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { isStrongPassword, PASSWORD_ERROR, PASSWORD_REQUIREMENTS } from "@/lib/password-security";
 
 export function AuthForm({ mode, demo = false }: { mode: "login" | "register"; demo?: boolean }) {
   const router = useRouter();
@@ -17,16 +18,24 @@ export function AuthForm({ mode, demo = false }: { mode: "login" | "register"; d
     event.preventDefault();
     setPending(true);
     const form = new FormData(event.currentTarget);
+    const password = String(form.get("password") ?? "");
+
+    if (mode === "register" && !isStrongPassword(password)) {
+      toast.error(PASSWORD_ERROR);
+      setPending(false);
+      return;
+    }
+
     const payload =
       mode === "register"
         ? {
             name: form.get("name"),
             email: form.get("email"),
-            password: form.get("password"),
+            password,
           }
         : {
             email: form.get("email"),
-            password: form.get("password"),
+            password,
           };
 
     try {
@@ -39,8 +48,8 @@ export function AuthForm({ mode, demo = false }: { mode: "login" | "register"; d
       if (!response.ok) {
         throw new Error(json.error ?? "Authentication failed");
       }
-      toast.success(mode === "register" ? "Account created" : "Welcome back");
-      router.push("/dashboard");
+      toast.success(mode === "register" ? "Registration submitted. Log in to continue." : "Welcome back");
+      router.push(mode === "register" ? json.redirectTo ?? "/login" : "/dashboard");
       router.refresh();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Authentication failed");
@@ -87,9 +96,19 @@ export function AuthForm({ mode, demo = false }: { mode: "login" | "register"; d
               name="password"
               type="password"
               required
-              placeholder="password123"
+              minLength={mode === "register" ? 10 : undefined}
+              autoComplete={mode === "register" ? "new-password" : "current-password"}
+              placeholder={demo ? "password123" : "Enter your password"}
               defaultValue={demo ? "password123" : ""}
+              aria-describedby={mode === "register" ? "password-requirements" : undefined}
             />
+            {mode === "register" ? (
+              <ul id="password-requirements" className="grid gap-1 text-xs text-muted-foreground">
+                {PASSWORD_REQUIREMENTS.map((requirement) => (
+                  <li key={requirement}>{requirement}</li>
+                ))}
+              </ul>
+            ) : null}
           </div>
           <Button type="submit" disabled={pending}>
             {pending ? "Please wait..." : mode === "register" ? "Create account" : demo ? "Open demo dashboard" : "Log in"}

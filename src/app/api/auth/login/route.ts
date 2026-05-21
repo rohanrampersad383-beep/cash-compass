@@ -16,7 +16,13 @@ export async function POST(request: Request) {
     return limited;
   }
 
-  const body = await request.json();
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Enter a valid email and password." }, { status: 400 });
+  }
+
   const parsed = loginSchema.safeParse(body);
 
   if (!parsed.success) {
