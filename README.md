@@ -43,17 +43,29 @@ Cash Compass is a SaaS-style personal finance tracker built as a portfolio proje
 
 ## Screenshots
 
-No committed screenshots are currently included in the repository. A placeholder folder is available at [`docs/screenshots`](docs/screenshots) with the recommended capture list.
+Public fintech landing page with demo CTA and privacy-focused messaging.
 
-Suggested screenshots to add:
+![Cash Compass landing page](docs/screenshots/landing-page.png)
 
-- Landing page
-- Demo login
-- Dashboard
-- Transactions ledger
-- CSV upload preview
-- Analytics or Cash Compass Assistant
-- Mobile dashboard
+Seeded demo workspace for quick recruiter review.
+
+![Cash Compass demo login](docs/screenshots/demo-login.png)
+
+Main finance dashboard showing balance, income, expenses, savings, charts, recent activity, bills, and goals.
+
+![Cash Compass dashboard](docs/screenshots/dashboard.png)
+
+Unified ledger for income, expenses, bills, recurring items, filtering, and search.
+
+![Cash Compass transactions ledger](docs/screenshots/transactions-ledger.png)
+
+Manual statement upload flow with preview and validation.
+
+![Cash Compass CSV upload](docs/screenshots/csv-upload.png)
+
+Finance insights and chart-based review experience.
+
+![Cash Compass analytics](docs/screenshots/analytics-or-assistant.png)
 
 ## Tech Stack
 
