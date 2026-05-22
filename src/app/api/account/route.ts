@@ -37,6 +37,8 @@ export async function DELETE(request: Request) {
   try {
     await prisma.$transaction(async (tx) => {
       await tx.session.deleteMany({ where: { userId: user.id } });
+      await tx.passwordResetToken.deleteMany({ where: { userId: user.id } });
+      await tx.emailVerificationToken.deleteMany({ where: { userId: user.id } });
       await tx.transaction.deleteMany({ where: { userId: user.id } });
       await tx.income.deleteMany({ where: { userId: user.id } });
       await tx.expense.deleteMany({ where: { userId: user.id } });

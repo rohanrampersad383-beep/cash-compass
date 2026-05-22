@@ -1,5 +1,6 @@
 import { Prisma } from "@/generated/prisma/client";
 import { NextResponse } from "next/server";
+import { sendEmailVerificationLink } from "@/lib/auth-recovery";
 import { hashPassword } from "@/lib/auth";
 import { validateMutationOrigin } from "@/lib/csrf";
 import { prisma } from "@/lib/prisma";
@@ -42,7 +43,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    await prisma.user.create({
+    const user = await prisma.user.create({
       data: {
         name: parsed.data.name,
         email: parsed.data.email,
@@ -60,6 +61,8 @@ export async function POST(request: Request) {
         },
       },
     });
+
+    await sendEmailVerificationLink(user);
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
       return NextResponse.json(REGISTER_RESPONSE);

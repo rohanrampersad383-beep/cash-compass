@@ -114,6 +114,13 @@ export function AuthForm({ mode, demo = false }: { mode: "login" | "register"; d
             {pending ? "Please wait..." : mode === "register" ? "Create account" : demo ? "Open demo dashboard" : "Log in"}
           </Button>
         </form>
+        {mode === "login" && !demo ? (
+          <p className="mt-4 text-center text-sm">
+            <Link className="font-medium text-primary" href="/forgot-password">
+              Forgot password?
+            </Link>
+          </p>
+        ) : null}
         <p className="mt-5 text-center text-sm text-muted-foreground">
           {mode === "register" ? "Already have an account?" : "New to Cash Compass?"}{" "}
           <Link className="font-medium text-primary" href={mode === "register" ? "/login" : "/register"}>

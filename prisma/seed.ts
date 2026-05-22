@@ -35,16 +35,19 @@ async function main() {
 
   const user = await prisma.user.upsert({
     where: { email: "demo@financialtracks.dev" },
-    update: { name: "Asha Demo", passwordHash, currencyCode: "TTD" },
+    update: { name: "Asha Demo", passwordHash, currencyCode: "TTD", emailVerifiedAt: now },
     create: {
       name: "Asha Demo",
       email: "demo@financialtracks.dev",
       passwordHash,
       currencyCode: "TTD",
+      emailVerifiedAt: now,
     },
   });
 
   await prisma.session.deleteMany({ where: { userId: user.id } });
+  await prisma.passwordResetToken.deleteMany({ where: { userId: user.id } });
+  await prisma.emailVerificationToken.deleteMany({ where: { userId: user.id } });
   await prisma.transaction.deleteMany({ where: { userId: user.id } });
   await prisma.income.deleteMany({ where: { userId: user.id } });
   await prisma.expense.deleteMany({ where: { userId: user.id } });

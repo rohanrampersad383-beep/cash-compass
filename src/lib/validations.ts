@@ -19,6 +19,17 @@ export const loginSchema = z.object({
   password: z.string().min(1),
 });
 
+export const forgotPasswordSchema = z.object({
+  email: z.string().trim().email().toLowerCase(),
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().trim().min(20),
+  password: z.string().min(10, PASSWORD_ERROR).max(128, "Use 128 characters or fewer.").refine(isStrongPassword, {
+    message: PASSWORD_ERROR,
+  }),
+});
+
 export const transactionSchema = z.object({
   title: z.string().trim().min(2).max(120),
   amount: money,

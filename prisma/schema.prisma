@@ -8,22 +8,51 @@ datasource db {
 }
 
 model User {
-  id                 String              @id @default(cuid())
-  name               String
-  email              String              @unique
-  passwordHash       String
-  currencyCode       String              @default("TTD")
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @updatedAt
-  bills              Bill[]
-  budgets            Budget[]
-  categories         Category[]
-  expenses           Expense[]
-  incomes            Income[]
-  savingsGoals       SavingsGoal[]
-  sessions           Session[]
-  transactions       Transaction[]
-  uploadedStatements UploadedStatement[]
+  id                      String                   @id @default(cuid())
+  name                    String
+  email                   String                   @unique
+  emailVerifiedAt         DateTime?
+  passwordHash            String
+  currencyCode            String                   @default("TTD")
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  bills                   Bill[]
+  budgets                 Budget[]
+  categories              Category[]
+  expenses                Expense[]
+  incomes                 Income[]
+  emailVerificationTokens EmailVerificationToken[]
+  passwordResetTokens     PasswordResetToken[]
+  savingsGoals            SavingsGoal[]
+  sessions                Session[]
+  transactions            Transaction[]
+  uploadedStatements      UploadedStatement[]
+}
+
+model PasswordResetToken {
+  id         String    @id @default(cuid())
+  tokenHash  String    @unique
+  userId     String
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model EmailVerificationToken {
+  id         String    @id @default(cuid())
+  tokenHash  String    @unique
+  userId     String
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
 }
 
 model Session {

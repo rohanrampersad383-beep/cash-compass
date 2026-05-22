@@ -6,6 +6,8 @@ import { DeleteAccountControl } from "@/components/finance/delete-account-contro
 import { ExportDataControl } from "@/components/finance/export-data-control";
 import { LogoutAllSessionsControl } from "@/components/finance/logout-all-sessions-control";
 import { PageHeader } from "@/components/finance/page-header";
+import { ResendVerificationControl } from "@/components/finance/resend-verification-control";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -46,8 +48,20 @@ export default async function SettingsPage() {
           <CardDescription>Your signed-in demo or registered account.</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
+          {!user.emailVerifiedAt ? (
+            <Alert className="border-amber-400/30 bg-amber-500/10">
+              <AlertTitle>Email verification pending</AlertTitle>
+              <AlertDescription>
+                Verify your email to keep account recovery ready. You can keep using Cash Compass while verification is pending.
+              </AlertDescription>
+              <div className="mt-3">
+                <ResendVerificationControl />
+              </div>
+            </Alert>
+          ) : null}
           <Setting label="Name" value={user.name} />
           <Setting label="Email" value={user.email} />
+          <Setting label="Email status" value={user.emailVerifiedAt ? "Verified" : "Not verified"} />
           <Setting label="Display currency" value={normalizeCurrency(user.currencyCode)} />
         </CardContent>
       </Card>

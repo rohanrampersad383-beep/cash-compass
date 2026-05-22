@@ -113,6 +113,9 @@ Implemented security and privacy controls include:
 - rate limiting for login, registration, CSV upload, and finance mutations
 - CSP and security headers in `next.config.ts`
 - logout current session and logout all sessions controls
+- password reset support with hashed, expiring, single-use reset tokens
+- email verification readiness with hashed, expiring, single-use verification tokens
+- generic auth recovery responses to reduce email enumeration risk
 - account deletion flow that removes user-scoped app data
 - user data export/download that excludes password hashes, session hashes, and authentication secrets
 - manual CSV upload instead of direct bank login
@@ -120,6 +123,18 @@ Implemented security and privacy controls include:
 - privacy notice describing stored data, analytics usage, CSV imports, and account deletion controls
 
 Cash Compass is still a portfolio V1. Use sample/test data while the app continues to improve.
+
+## Auth Recovery & Email Verification
+
+Cash Compass includes password reset and email verification flows designed for production readiness:
+
+- Forgot-password requests always return a generic response, whether or not the email exists.
+- Password reset tokens are generated securely, hashed before storage, expire after a short window, and are consumed after use.
+- Successful password resets invalidate existing sessions for that user.
+- Email verification tokens are also hashed, expiring, and single-use.
+- Raw recovery or verification tokens are never stored in the database.
+- Local development can use a safe console fallback for reset and verification links when no email provider is configured.
+- Production email delivery is environment-variable driven and should be configured through the hosting provider, not committed to the repo.
 
 ## CSV Upload Safety
 
@@ -167,6 +182,11 @@ Optional:
 - `DIRECT_URL` - direct Neon/PostgreSQL connection string for Prisma migrations/introspection
 - `UPSTASH_REDIS_REST_URL` - Upstash Redis REST URL for distributed rate limiting
 - `UPSTASH_REDIS_REST_TOKEN` - Upstash Redis REST token for distributed rate limiting
+- `APP_URL` - canonical app URL used to build password reset and email verification links
+- `EMAIL_FROM` - sender address for auth recovery and verification emails
+- `RESEND_API_KEY` - optional Resend API key for production email delivery
+
+Never commit real `.env` values, database credentials, API keys, auth secrets, Vercel tokens, Neon credentials, Upstash tokens, or email provider keys.
 
 ## Database / Prisma Notes
 
@@ -187,6 +207,8 @@ The app is deployed on Vercel:
 [https://cash-compass-finance.vercel.app](https://cash-compass-finance.vercel.app)
 
 Production requires `DATABASE_URL` in Vercel environment variables. `DIRECT_URL` is useful for Prisma migration workflows. Upstash Redis environment variables are optional but recommended for distributed production rate limiting.
+
+For production password reset and email verification delivery, configure `APP_URL`, `EMAIL_FROM`, and `RESEND_API_KEY` in Vercel environment variables. Without an email provider, development logs safe test links to the server console; production does not expose recovery links to users when email delivery is not configured.
 
 Vercel Analytics and Speed Insights are installed in the root App Router layout.
 
@@ -211,7 +233,6 @@ Some product-level improvements remain before treating it as a production financ
 ## Future Improvements
 
 - Automatic category suggestions and reusable import rules
-- Password reset and email verification
 - Transaction CSV export and automated export scheduling
 - Full integration tests for auth/session cookies and database-backed API authorization
 - Real AI assistant integration later
@@ -224,8 +245,14 @@ Some product-level improvements remain before treating it as a production financ
 - Implemented custom authentication/session handling with bcrypt, hashed session tokens, and HTTP-only cookies
 - Built a unified finance ledger covering income, expenses, bills, budgets, savings goals, custom categories, and CSV imports
 - Added privacy-conscious CSV upload with column mapping, category review, server validation, row limits, and formula-injection hardening
-- Added security hardening with CSRF/origin checks, rate limiting, CSP/security headers, logout-all-sessions, user data export, and account deletion
+- Added security hardening with CSRF/origin checks, rate limiting, CSP/security headers, password reset, email verification readiness, logout-all-sessions, user data export, and account deletion
 - Designed a responsive fintech UI with charts, analytics, motion, branded assets, and realistic demo data
+
+## Copyright & Usage
+
+Copyright (c) 2026 Rohan Rampersad. All rights reserved.
+
+This project is provided for portfolio and demonstration purposes only. You may not copy, redistribute, sell, or claim this project as your own without written permission. Real secrets must never be committed; use `.env.example` as a placeholder-only template.
 
 ## Quality Checks
 
@@ -236,6 +263,7 @@ Focused Node test coverage currently includes:
 - user-scoping regression checks for category, ledger, statement upload, and account export routes
 - data export serialization checks that exclude password/session fields
 - finance validation checks for transaction, bill, and budget inputs
+- auth token checks for hashing, expiry, single-use consumption behavior, and raw-token exclusion
 
 ```bash
 npm run test

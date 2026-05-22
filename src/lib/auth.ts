@@ -13,6 +13,7 @@ export type SafeUser = {
   id: string;
   name: string;
   email: string;
+  emailVerifiedAt: Date | null;
   currencyCode: string;
 };
 
@@ -91,6 +92,7 @@ export async function getCurrentUser(): Promise<SafeUser | null> {
           id: true,
           name: true,
           email: true,
+          emailVerifiedAt: true,
           currencyCode: true,
         },
       },

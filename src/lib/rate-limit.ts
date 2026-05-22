@@ -45,6 +45,18 @@ export const rateLimitPresets = {
     windowMs: 30 * 60 * 1000,
     message: "Too many registration attempts. Please wait before creating another account.",
   },
+  authRecovery: {
+    key: "auth:recovery",
+    limit: 5,
+    windowMs: 30 * 60 * 1000,
+    message: "Too many account recovery attempts. Please wait before trying again.",
+  },
+  emailVerification: {
+    key: "auth:verify-email",
+    limit: 3,
+    windowMs: 60 * 60 * 1000,
+    message: "Too many verification email requests. Please wait before trying again.",
+  },
   csvUpload: {
     key: "csv:upload",
     limit: 10,
