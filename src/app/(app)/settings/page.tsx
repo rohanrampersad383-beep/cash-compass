@@ -3,6 +3,7 @@ import { ShieldCheck } from "lucide-react";
 import { CategoryManagement } from "@/components/finance/category-management";
 import { CurrencySettings } from "@/components/finance/currency-settings";
 import { DeleteAccountControl } from "@/components/finance/delete-account-control";
+import { ExportDataControl } from "@/components/finance/export-data-control";
 import { LogoutAllSessionsControl } from "@/components/finance/logout-all-sessions-control";
 import { PageHeader } from "@/components/finance/page-header";
 import { Badge } from "@/components/ui/badge";
@@ -76,6 +77,20 @@ export default async function SettingsPage() {
             The privacy notice explains stored account data, finance records, CSV imports, Vercel Analytics, and deletion controls.
           </div>
           <Button variant="outline" render={<Link href="/privacy" />}>View privacy notice</Button>
+        </CardContent>
+      </Card>
+      <Card className="glass-panel">
+        <CardHeader>
+          <CardTitle>Export Data</CardTitle>
+          <CardDescription>Download a copy of your Cash Compass workspace data.</CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-muted-foreground">
+            Download a copy of your Cash Compass data, including transactions, income, expenses, bills,
+            budgets, savings goals, categories, and uploaded statement history. Sensitive authentication
+            data is never included.
+          </p>
+          <ExportDataControl />
         </CardContent>
       </Card>
       <Card className="glass-panel">

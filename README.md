@@ -37,7 +37,7 @@ Cash Compass is a SaaS-style personal finance tracker built as a portfolio proje
 - Currency preference support for TTD, USD, EUR, GBP, CAD, AUD, NZD, JPY, CNY, INR, SGD, AED, ZAR, JMD, BBD, and XCD
 - Charts and analytics for income vs expenses, savings trends, and spending by category
 - Rule-based finance assistant with smart demo insights and recommendations
-- Settings and preferences for currency, session controls, privacy notice, and account deletion
+- Settings and preferences for currency, session controls, user data export, privacy notice, and account deletion
 - Privacy notice and security-focused product copy
 - Responsive desktop/mobile layout with a polished dark fintech UI
 
@@ -91,7 +91,7 @@ Finance insights and chart-based review experience.
 - `src/app` contains the Next.js App Router pages, route groups, metadata, and API routes.
 - Public pages include the landing page and privacy notice.
 - Protected app pages live under `src/app/(app)` and are wrapped by a server-side layout that requires an authenticated user.
-- API mutation routes live under `src/app/api` and handle auth, finance records, CSV imports, settings, sessions, and account deletion.
+- API routes live under `src/app/api` and handle auth, finance records, CSV imports, settings, sessions, user data export, and account deletion.
 - Prisma models define users, sessions, categories, transactions, income, expenses, bills, budgets, savings goals, and uploaded statements.
 - Neon PostgreSQL stores the application data.
 - `src/lib/data.ts` centralizes finance data loading with user-scoped Prisma queries.
@@ -113,6 +113,7 @@ Implemented security and privacy controls include:
 - CSP and security headers in `next.config.ts`
 - logout current session and logout all sessions controls
 - account deletion flow that removes user-scoped app data
+- user data export/download that excludes password hashes, session hashes, and authentication secrets
 - manual CSV upload instead of direct bank login
 - CSV validation, column mapping checks, row limits, file size limits, category ownership checks, and spreadsheet formula-injection neutralization
 - privacy notice describing stored data, analytics usage, CSV imports, and account deletion controls
@@ -201,7 +202,7 @@ Core finance tracking flows are complete:
 - bills, budgets, and savings goals
 - CSV import column mapping, category review, preview, and confirmation
 - analytics and rule-based assistant
-- settings, currency preferences, privacy notice, and account deletion
+- settings, currency preferences, data export, privacy notice, and account deletion
 
 Some product-level improvements remain before treating it as a production financial application for sensitive real data.
 
@@ -209,7 +210,7 @@ Some product-level improvements remain before treating it as a production financ
 
 - Automatic category suggestions and reusable import rules
 - Password reset and email verification
-- Data export/download
+- Transaction CSV export and automated export scheduling
 - More automated tests for auth, finance calculations, CSV validation, and API authorization
 - Real AI assistant integration later
 - Budget alerts and notifications later
@@ -221,7 +222,7 @@ Some product-level improvements remain before treating it as a production financ
 - Implemented custom authentication/session handling with bcrypt, hashed session tokens, and HTTP-only cookies
 - Built a unified finance ledger covering income, expenses, bills, budgets, savings goals, custom categories, and CSV imports
 - Added privacy-conscious CSV upload with column mapping, category review, server validation, row limits, and formula-injection hardening
-- Added security hardening with CSRF/origin checks, rate limiting, CSP/security headers, logout-all-sessions, and account deletion
+- Added security hardening with CSRF/origin checks, rate limiting, CSP/security headers, logout-all-sessions, user data export, and account deletion
 - Designed a responsive fintech UI with charts, analytics, motion, branded assets, and realistic demo data
 
 ## Quality Checks
