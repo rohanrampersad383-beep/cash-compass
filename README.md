@@ -33,7 +33,7 @@ Cash Compass is a SaaS-style personal finance tracker built as a portfolio proje
 - Savings goals with progress tracking and milestone-style feedback
 - Unified transaction ledger with search, filters, tabs, edit/delete controls, and quick actions
 - Custom category creation and Settings-based category management with safe edit/delete controls
-- CSV/bank statement upload with preview before import
+- CSV/bank statement upload with column mapping, category review, and preview before import
 - Currency preference support for TTD, USD, EUR, GBP, CAD, AUD, NZD, JPY, CNY, INR, SGD, AED, ZAR, JMD, BBD, and XCD
 - Charts and analytics for income vs expenses, savings trends, and spending by category
 - Rule-based finance assistant with smart demo insights and recommendations
@@ -59,7 +59,7 @@ Unified ledger for income, expenses, bills, recurring items, filtering, and sear
 
 ![Cash Compass transactions ledger](docs/screenshots/transactions-ledger.png)
 
-Manual statement upload flow with preview and validation.
+Manual statement upload flow with column mapping, category review, preview, and validation.
 
 ![Cash Compass CSV upload](docs/screenshots/csv-upload.png)
 
@@ -96,7 +96,7 @@ Finance insights and chart-based review experience.
 - Neon PostgreSQL stores the application data.
 - `src/lib/data.ts` centralizes finance data loading with user-scoped Prisma queries.
 - `src/lib/finance.ts` contains summary, budget, chart, currency, and calculation helpers.
-- CSV import uses a browser preview flow and a server-side confirmation route before rows are stored.
+- CSV import uses a browser mapping and preview flow plus a server-side confirmation route before rows are stored.
 - The production app is deployed on Vercel and uses environment variables for database and optional distributed rate limiting.
 
 ## Security & Privacy Highlights
@@ -114,7 +114,7 @@ Implemented security and privacy controls include:
 - logout current session and logout all sessions controls
 - account deletion flow that removes user-scoped app data
 - manual CSV upload instead of direct bank login
-- CSV validation, row limits, file size limits, and spreadsheet formula-injection neutralization
+- CSV validation, column mapping checks, row limits, file size limits, category ownership checks, and spreadsheet formula-injection neutralization
 - privacy notice describing stored data, analytics usage, CSV imports, and account deletion controls
 
 Cash Compass is still a portfolio V1. Use sample/test data while the app continues to improve.
@@ -124,10 +124,12 @@ Cash Compass is still a portfolio V1. Use sample/test data while the app continu
 The statement upload flow is intentionally manual and user-controlled:
 
 - Users choose a CSV file themselves.
-- CSV rows are previewed before import.
+- CSV columns can be mapped to Cash Compass fields before import.
+- CSV rows are previewed before import with type, amount, category, and validation status.
+- Existing user categories can be assigned during review without creating categories automatically.
 - Only confirmed rows are saved.
 - No bank credentials are requested or stored.
-- Server-side validation enforces file size, payload size, row count, date format, and amount limits.
+- Server-side validation enforces mapping requirements, file size, payload size, row count, date format, amount limits, transaction type rules, and category ownership.
 - Imported text is trimmed, normalized, length-limited, and neutralized if it starts with spreadsheet formula characters such as `=`, `+`, `-`, or `@`.
 - Parser/internal errors are converted into clean user-facing API errors.
 
@@ -197,7 +199,7 @@ Core finance tracking flows are complete:
 - transactions ledger
 - income and expense tracking
 - bills, budgets, and savings goals
-- CSV import preview and confirmation
+- CSV import column mapping, category review, preview, and confirmation
 - analytics and rule-based assistant
 - settings, currency preferences, privacy notice, and account deletion
 
@@ -205,7 +207,7 @@ Some product-level improvements remain before treating it as a production financ
 
 ## Future Improvements
 
-- CSV column mapping and category assignment during import
+- Automatic category suggestions and reusable import rules
 - Password reset and email verification
 - Data export/download
 - More automated tests for auth, finance calculations, CSV validation, and API authorization
@@ -218,7 +220,7 @@ Some product-level improvements remain before treating it as a production financ
 - Built a full-stack finance SaaS-style app with Next.js, TypeScript, Prisma, Neon PostgreSQL, and Vercel
 - Implemented custom authentication/session handling with bcrypt, hashed session tokens, and HTTP-only cookies
 - Built a unified finance ledger covering income, expenses, bills, budgets, savings goals, custom categories, and CSV imports
-- Added privacy-conscious CSV upload with preview, server validation, row limits, and formula-injection hardening
+- Added privacy-conscious CSV upload with column mapping, category review, server validation, row limits, and formula-injection hardening
 - Added security hardening with CSRF/origin checks, rate limiting, CSP/security headers, logout-all-sessions, and account deletion
 - Designed a responsive fintech UI with charts, analytics, motion, branded assets, and realistic demo data
 

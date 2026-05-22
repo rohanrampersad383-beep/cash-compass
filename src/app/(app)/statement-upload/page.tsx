@@ -1,5 +1,6 @@
 import { CsvUpload } from "@/components/finance/csv-upload";
 import { PageHeader } from "@/components/finance/page-header";
+import { CategoryType } from "@/generated/prisma/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 import { requireUser } from "@/lib/auth";
@@ -10,11 +11,20 @@ export default async function StatementUploadPage() {
   const user = await requireUser();
   const data = await getFinanceData(user.id);
   const currencyCode = normalizeCurrency(user.currencyCode);
+  const importCategories = data.categories
+    .filter((category) => category.type === CategoryType.INCOME || category.type === CategoryType.EXPENSE)
+    .map((category) => ({
+      id: category.id,
+      name: category.name,
+      type: category.type,
+      color: category.color,
+      icon: category.icon,
+    }));
 
   return (
     <div className="grid gap-6">
       <PageHeader title="Statement Upload" description="Import bank CSV exports manually, preview clean rows, then confirm what gets saved." />
-      <CsvUpload currencyCode={currencyCode} />
+      <CsvUpload currencyCode={currencyCode} categories={importCategories} />
       <Card className="glass-panel">
         <CardHeader>
           <CardTitle>Recent uploads</CardTitle>
