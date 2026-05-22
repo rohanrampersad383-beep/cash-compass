@@ -50,6 +50,17 @@ export type MappedCsvPreviewResult = {
   hasBlockingIssues: boolean;
 };
 
+export type CsvImportCategoryAssignment = {
+  rowNumber?: number;
+  kind: CsvTransactionKind;
+  categoryId?: string | null;
+};
+
+export type CsvImportCategoryForValidation = {
+  id: string;
+  type: CsvTransactionKind;
+};
+
 const HEADER_ALIASES = {
   date: ["date", "transaction date", "posted date", "time"],
   description: ["description", "merchant", "memo", "details", "transaction", "payee", "name"],
@@ -306,4 +317,25 @@ export function buildMappedCsvPreviewRows(
     rows,
     hasBlockingIssues: rows.some((row) => Boolean(row.issue)),
   };
+}
+
+export function validateCsvImportCategoryAssignment(
+  row: CsvImportCategoryAssignment,
+  category: CsvImportCategoryForValidation | undefined,
+) {
+  if (!row.categoryId) {
+    return null;
+  }
+
+  const rowNumber = row.rowNumber ?? 1;
+
+  if (!category) {
+    return `Row ${rowNumber} uses a category that is not available for this account.`;
+  }
+
+  if (category.type !== row.kind) {
+    return `Row ${rowNumber} uses a category that does not match its transaction type.`;
+  }
+
+  return null;
 }

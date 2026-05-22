@@ -4,6 +4,7 @@ import {
   buildMappedCsvPreviewRows,
   suggestCsvMapping,
   validateCsvMapping,
+  validateCsvImportCategoryAssignment,
   normalizeImportedText,
 } from "@/lib/csv-import";
 
@@ -74,4 +75,34 @@ test("validates required mapping fields", () => {
 
 test("neutralizes spreadsheet formula text", () => {
   assert.equal(normalizeImportedText("=IMPORTXML('x')", 120), "'=IMPORTXML('x')");
+});
+
+test("blocks CSV import category IDs that are not available to the current user", () => {
+  assert.equal(
+    validateCsvImportCategoryAssignment(
+      { rowNumber: 4, kind: "EXPENSE", categoryId: "other-user-category" },
+      undefined,
+    ),
+    "Row 4 uses a category that is not available for this account.",
+  );
+});
+
+test("blocks CSV import category type mismatches", () => {
+  assert.equal(
+    validateCsvImportCategoryAssignment(
+      { rowNumber: 5, kind: "INCOME", categoryId: "expense-category" },
+      { id: "expense-category", type: "EXPENSE" },
+    ),
+    "Row 5 uses a category that does not match its transaction type.",
+  );
+});
+
+test("allows CSV import categories owned by the user with the matching type", () => {
+  assert.equal(
+    validateCsvImportCategoryAssignment(
+      { rowNumber: 6, kind: "EXPENSE", categoryId: "groceries-category" },
+      { id: "groceries-category", type: "EXPENSE" },
+    ),
+    null,
+  );
 });

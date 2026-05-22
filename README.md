@@ -211,7 +211,7 @@ Some product-level improvements remain before treating it as a production financ
 - Automatic category suggestions and reusable import rules
 - Password reset and email verification
 - Transaction CSV export and automated export scheduling
-- More automated tests for auth, finance calculations, CSV validation, and API authorization
+- Full integration tests for auth/session cookies and database-backed API authorization
 - Real AI assistant integration later
 - Budget alerts and notifications later
 - More onboarding guidance for newly registered users
@@ -227,7 +227,16 @@ Some product-level improvements remain before treating it as a production financ
 
 ## Quality Checks
 
+Focused Node test coverage currently includes:
+
+- category deletion guards for used and unused categories
+- CSV import validation, debit/credit handling, formula neutralization, and category assignment safety
+- user-scoping regression checks for category, ledger, statement upload, and account export routes
+- data export serialization checks that exclude password/session fields
+- finance validation checks for transaction, bill, and budget inputs
+
 ```bash
+npm run test
 npm run typecheck
 npm run lint
 npm run build

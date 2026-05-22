@@ -10,6 +10,7 @@ import {
   normalizeCsvDate,
   normalizeImportedText,
   sanitizeCsvFileName,
+  validateCsvImportCategoryAssignment,
   validateCsvMapping,
 } from "@/lib/csv-import";
 import { validateMutationOrigin } from "@/lib/csrf";
@@ -110,7 +111,15 @@ export async function POST(request: Request) {
         select: { id: true, type: true },
       })
     : [];
-  const categoryById = new Map(categories.map((category) => [category.id, category]));
+  const categoryById = new Map(
+    categories.map((category) => [
+      category.id,
+      {
+        id: category.id,
+        type: category.type === CategoryType.INCOME ? TransactionKind.INCOME : TransactionKind.EXPENSE,
+      },
+    ]),
+  );
 
   const rows = [];
 
@@ -127,18 +136,12 @@ export async function POST(request: Request) {
       return badImport(`Row ${rowNumber} has an invalid amount.`);
     }
 
-    if (row.categoryId) {
-      const category = categoryById.get(row.categoryId);
-      if (!category) {
-        return badImport(`Row ${rowNumber} uses a category that is not available for this account.`);
-      }
-
-      if (
-        (row.kind === TransactionKind.INCOME && category.type !== CategoryType.INCOME) ||
-        (row.kind === TransactionKind.EXPENSE && category.type !== CategoryType.EXPENSE)
-      ) {
-        return badImport(`Row ${rowNumber} uses a category that does not match its transaction type.`);
-      }
+    const categoryError = validateCsvImportCategoryAssignment(
+      { rowNumber, kind: row.kind, categoryId: row.categoryId },
+      row.categoryId ? categoryById.get(row.categoryId) : undefined,
+    );
+    if (categoryError) {
+      return badImport(categoryError);
     }
 
     rows.push({
