@@ -1,5 +1,19 @@
 import Link from "next/link";
-import { Banknote, CircleDollarSign, CreditCard, FileSpreadsheet, Flame, PiggyBank, Plus, ReceiptText, Trophy, Wallet, type LucideIcon } from "lucide-react";
+import {
+  Banknote,
+  CircleDollarSign,
+  Compass,
+  CreditCard,
+  FileSpreadsheet,
+  Flame,
+  PiggyBank,
+  Plus,
+  ReceiptText,
+  Target,
+  Trophy,
+  Wallet,
+  type LucideIcon,
+} from "lucide-react";
 import { CompassSweep } from "@/components/brand/compass-sweep";
 import { IncomeExpenseChart, SpendingChart } from "@/components/finance/charts";
 import { BillsList, GoalsList, TransactionsTable } from "@/components/finance/data-lists";
@@ -12,6 +26,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { buildBudgetSummary, buildFinanceSummary, currency, monthlyChartData, normalizeCurrency, percent, toNumber, type CurrencyCode } from "@/lib/finance";
 import { requireUser } from "@/lib/auth";
 import { getFinanceData } from "@/lib/data";
+import { shouldShowOnboarding } from "@/lib/onboarding";
 import { cn } from "@/lib/utils";
 
 export default async function DashboardPage() {
@@ -29,6 +44,13 @@ export default async function DashboardPage() {
       progress: Math.min(100, (toNumber(goal.currentAmount) / toNumber(goal.targetAmount)) * 100),
     }))
     .sort((a, b) => b.progress - a.progress)[0];
+  const showOnboarding = shouldShowOnboarding({
+    transactions: data.ledgerTransactions.length,
+    bills: data.bills.length,
+    budgets: data.budgets.length,
+    savingsGoals: data.goals.length,
+    uploadedStatements: data.statements.length,
+  });
 
   return (
     <div className="relative">
@@ -38,6 +60,12 @@ export default async function DashboardPage() {
         description="A beginner-friendly snapshot of what came in, what went out, and what is coming next."
         badge={`${percent(summary.savingsRate)} savings rate`}
       />
+
+      {showOnboarding ? (
+        <MotionStack className="mb-6">
+          <MotionItem><WelcomeOnboardingCard /></MotionItem>
+        </MotionStack>
+      ) : null}
 
       <MotionStack className="mb-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
         <MotionItem><QuickAction href="/transactions?intent=income" label="Add income" detail="Salary, freelance, refunds" icon={Banknote} /></MotionItem>
@@ -102,6 +130,53 @@ export default async function DashboardPage() {
         </MotionItem>
       </MotionStack>
     </div>
+  );
+}
+
+const onboardingActions = [
+  { href: "/transactions?intent=income", label: "Add income", icon: Banknote },
+  { href: "/transactions?intent=expense", label: "Add expense", icon: CreditCard },
+  { href: "/budgets", label: "Create budget", icon: CircleDollarSign },
+  { href: "/bills", label: "Add bill", icon: ReceiptText },
+  { href: "/savings-goals", label: "Set savings goal", icon: Target },
+  { href: "/statement-upload", label: "Upload CSV statement", icon: FileSpreadsheet },
+];
+
+function WelcomeOnboardingCard() {
+  return (
+    <Card className="glass-panel premium-glow spotlight-card relative overflow-hidden">
+      <div className="pointer-events-none absolute -right-10 -top-10 size-36 rounded-full border border-primary/20" aria-hidden="true" />
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-2xl">
+          <Compass className="size-5 text-primary" aria-hidden="true" />
+          Welcome to Cash Compass
+        </CardTitle>
+        <CardDescription>
+          Set up your finance workspace by adding your first transaction, creating a budget, adding a bill,
+          setting a savings goal, or uploading a CSV statement.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="grid gap-4">
+        <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+          {onboardingActions.map(({ href, label, icon: Icon }) => (
+            <Link
+              key={href}
+              href={href}
+              className={cn(
+                buttonVariants({ variant: "outline" }),
+                "h-auto justify-start gap-2 rounded-xl bg-background/50 p-3 text-left transition hover:border-primary/45 hover:bg-accent/30",
+              )}
+            >
+              <Icon className="size-4 text-primary" aria-hidden="true" />
+              {label}
+            </Link>
+          ))}
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Want to explore a filled dashboard first? Use the demo workspace from the login page when signed out.
+        </p>
+      </CardContent>
+    </Card>
   );
 }
 

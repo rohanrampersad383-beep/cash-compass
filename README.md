@@ -27,6 +27,7 @@ Cash Compass is a SaaS-style personal finance tracker built as a portfolio proje
 - Register/login authentication with protected app routes
 - Seeded demo workspace with realistic sample finance data
 - Protected dashboard with balance, income, expenses, savings, bills, goals, budgets, and insights
+- New-user dashboard onboarding with quick-start actions for empty workspaces
 - Income and expense tracking through a unified transaction workflow
 - Bills management with due dates, frequency, category, and paid/unpaid status
 - Budgets management with monthly limits, remaining amounts, and health states
@@ -203,6 +204,7 @@ Core finance tracking flows are complete:
 - CSV import column mapping, category review, preview, and confirmation
 - analytics and rule-based assistant
 - settings, currency preferences, data export, privacy notice, and account deletion
+- first-time onboarding guidance and empty-workspace setup links
 
 Some product-level improvements remain before treating it as a production financial application for sensitive real data.
 
@@ -214,7 +216,7 @@ Some product-level improvements remain before treating it as a production financ
 - Full integration tests for auth/session cookies and database-backed API authorization
 - Real AI assistant integration later
 - Budget alerts and notifications later
-- More onboarding guidance for newly registered users
+- Optional onboarding checklist persistence for multi-session setup progress
 
 ## Recruiter Highlights
 
