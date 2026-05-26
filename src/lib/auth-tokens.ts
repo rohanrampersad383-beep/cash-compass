@@ -28,6 +28,6 @@ export function isAuthTokenUsable(token: ConsumableAuthToken | null | undefined,
 export function genericAuthRecoveryResponse() {
   return {
     ok: true,
-    message: "If an account exists for that email, a link has been sent.",
+    message: "If an account exists for that email, a reset link has been sent.",
   };
 }

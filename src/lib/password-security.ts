@@ -1,22 +1,25 @@
 const WEAK_PASSWORDS = new Set([
   "password",
   "password123",
+  "password1234",
   "qwerty",
+  "qwerty123",
   "12345678",
   "123456789",
+  "1234567890",
   "admin123",
+  "letmein123",
+  "user123456",
   "cashcompass",
+  "cashcompass123",
 ]);
 
 export const PASSWORD_REQUIREMENTS = [
-  "Use at least 10 characters.",
-  "Include at least one letter and one number.",
-  "Add a symbol, or use a passphrase of 16+ characters.",
-  "Avoid obvious passwords like password123, qwerty, or cashcompass.",
+  "Use at least 10 characters with a letter and number. Add a symbol, or use a 16+ character passphrase. Avoid obvious passwords.",
 ];
 
 export const PASSWORD_ERROR =
-  "Use 10+ characters with a letter, number, and symbol, or a 16+ character passphrase. Avoid obvious passwords.";
+  "Use at least 10 characters with a letter and number. Add a symbol, or use a 16+ character passphrase. Avoid obvious passwords.";
 
 function normalizedPassword(value: string) {
   return value.toLowerCase().replace(/[^a-z0-9]/g, "");

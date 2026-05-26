@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { BillStatus, CategoryType, Frequency, PaymentType, TransactionKind } from "@/generated/prisma/client";
+import { normalizeEmail } from "@/lib/auth-email";
 import { supportedCurrencyCodes } from "@/lib/finance";
 import { isStrongPassword, PASSWORD_ERROR } from "@/lib/password-security";
 
@@ -8,19 +9,19 @@ const dateString = z.string().min(1, "Choose a date").transform((value) => new D
 
 export const registerSchema = z.object({
   name: z.string().trim().min(2).max(80),
-  email: z.string().trim().email().toLowerCase(),
+  email: z.string().trim().email().transform(normalizeEmail),
   password: z.string().min(10, PASSWORD_ERROR).max(128, "Use 128 characters or fewer.").refine(isStrongPassword, {
     message: PASSWORD_ERROR,
   }),
 });
 
 export const loginSchema = z.object({
-  email: z.string().trim().email().toLowerCase(),
+  email: z.string().trim().email().transform(normalizeEmail),
   password: z.string().min(1),
 });
 
 export const forgotPasswordSchema = z.object({
-  email: z.string().trim().email().toLowerCase(),
+  email: z.string().trim().email().transform(normalizeEmail),
 });
 
 export const resetPasswordSchema = z.object({

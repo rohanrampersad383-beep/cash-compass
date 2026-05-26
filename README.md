@@ -134,7 +134,8 @@ Cash Compass includes password reset and email verification flows designed for p
 - Email verification tokens are also hashed, expiring, and single-use.
 - Raw recovery or verification tokens are never stored in the database.
 - Local development can use a safe console fallback for reset and verification links when no email provider is configured.
-- Production email delivery is environment-variable driven and should be configured through the hosting provider, not committed to the repo.
+- Production email delivery requires a real email provider. Cash Compass currently supports Resend through environment variables configured in Vercel, not committed to the repo.
+- If no reset or verification email arrives in production, check the Resend sender/domain verification status, spam/junk folders, Vercel environment variables, and whether the app was redeployed after env changes.
 
 ## CSV Upload Safety
 
@@ -182,9 +183,9 @@ Optional:
 - `DIRECT_URL` - direct Neon/PostgreSQL connection string for Prisma migrations/introspection
 - `UPSTASH_REDIS_REST_URL` - Upstash Redis REST URL for distributed rate limiting
 - `UPSTASH_REDIS_REST_TOKEN` - Upstash Redis REST token for distributed rate limiting
-- `APP_URL` - canonical app URL used to build password reset and email verification links
-- `EMAIL_FROM` - sender address for auth recovery and verification emails
-- `RESEND_API_KEY` - optional Resend API key for production email delivery
+- `APP_URL` - canonical app URL used to build password reset and email verification links, for example `https://cash-compass-finance.vercel.app`
+- `EMAIL_FROM` - verified Resend sender email/domain for auth recovery and verification emails
+- `RESEND_API_KEY` - Resend API key for production email delivery, stored only in Vercel/local env files
 
 Never commit real `.env` values, database credentials, API keys, auth secrets, Vercel tokens, Neon credentials, Upstash tokens, or email provider keys.
 
@@ -208,7 +209,13 @@ The app is deployed on Vercel:
 
 Production requires `DATABASE_URL` in Vercel environment variables. `DIRECT_URL` is useful for Prisma migration workflows. Upstash Redis environment variables are optional but recommended for distributed production rate limiting.
 
-For production password reset and email verification delivery, configure `APP_URL`, `EMAIL_FROM`, and `RESEND_API_KEY` in Vercel environment variables. Without an email provider, development logs safe test links to the server console; production does not expose recovery links to users when email delivery is not configured.
+For production password reset and email verification delivery, configure these Vercel environment variables:
+
+- `APP_URL=https://cash-compass-finance.vercel.app`
+- `EMAIL_FROM=<verified sender email/domain>`
+- `RESEND_API_KEY=<real secret added only in Vercel>`
+
+After changing Vercel environment variables, redeploy the app so the production runtime can use them. Without an email provider, local development may log safe test links to the server console. In production, real email delivery requires valid provider env vars; the app keeps user-facing recovery responses generic and logs server-side warnings if delivery is not configured.
 
 Vercel Analytics and Speed Insights are installed in the root App Router layout.
 

@@ -54,12 +54,16 @@ export async function sendPasswordResetLink(user: MailUser) {
 
   const actionUrl = authActionUrl("/reset-password", token.rawToken);
   const message = passwordResetMessage(user, actionUrl);
-  await sendAuthMail({
+  const delivery = await sendAuthMail({
     to: user.email,
     type: "password-reset",
     actionUrl,
     ...message,
   });
+
+  if (!delivery.ok) {
+    console.warn("Cash Compass password reset email was queued internally but not delivered. Check email provider configuration.");
+  }
 }
 
 export async function sendEmailVerificationLink(user: MailUser) {
@@ -80,12 +84,16 @@ export async function sendEmailVerificationLink(user: MailUser) {
 
   const actionUrl = authActionUrl("/verify-email", token.rawToken);
   const message = verificationMessage(user, actionUrl);
-  await sendAuthMail({
+  const delivery = await sendAuthMail({
     to: user.email,
     type: "email-verification",
     actionUrl,
     ...message,
   });
+
+  if (!delivery.ok) {
+    console.warn("Cash Compass verification email was queued internally but not delivered. Check email provider configuration.");
+  }
 }
 
 export async function resetPasswordWithToken(rawToken: string, password: string) {

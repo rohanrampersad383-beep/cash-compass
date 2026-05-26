@@ -1,6 +1,6 @@
-import { Prisma } from "@/generated/prisma/client";
 import { NextResponse } from "next/server";
 import { sendEmailVerificationLink } from "@/lib/auth-recovery";
+import { DUPLICATE_EMAIL_MESSAGE, isDuplicateEmailError } from "@/lib/auth-email";
 import { hashPassword } from "@/lib/auth";
 import { validateMutationOrigin } from "@/lib/csrf";
 import { prisma } from "@/lib/prisma";
@@ -11,6 +11,10 @@ const REGISTER_RESPONSE = {
   ok: true,
   message: "If this email can be registered, you can log in after submitting.",
   redirectTo: "/login",
+};
+
+const DUPLICATE_EMAIL_RESPONSE = {
+  error: DUPLICATE_EMAIL_MESSAGE,
 };
 
 export async function POST(request: Request) {
@@ -37,9 +41,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Check your registration details." }, { status: 400 });
   }
 
-  const exists = await prisma.user.findUnique({ where: { email: parsed.data.email } });
+  const exists = await prisma.user.findUnique({ where: { email: parsed.data.email }, select: { id: true } });
   if (exists) {
-    return NextResponse.json(REGISTER_RESPONSE);
+    return NextResponse.json(DUPLICATE_EMAIL_RESPONSE, { status: 409 });
   }
 
   try {
@@ -64,8 +68,8 @@ export async function POST(request: Request) {
 
     await sendEmailVerificationLink(user);
   } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
-      return NextResponse.json(REGISTER_RESPONSE);
+    if (isDuplicateEmailError(error)) {
+      return NextResponse.json(DUPLICATE_EMAIL_RESPONSE, { status: 409 });
     }
 
     return NextResponse.json({ error: "Account could not be created. Please try again." }, { status: 500 });

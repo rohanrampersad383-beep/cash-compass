@@ -58,6 +58,6 @@ test("rejects consumed tokens so reset and verification links cannot be reused",
 test("uses generic auth recovery response copy to avoid email enumeration", () => {
   assert.deepEqual(genericAuthRecoveryResponse(), {
     ok: true,
-    message: "If an account exists for that email, a link has been sent.",
+    message: "If an account exists for that email, a reset link has been sent.",
   });
 });
