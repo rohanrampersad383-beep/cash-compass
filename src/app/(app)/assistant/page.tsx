@@ -66,7 +66,7 @@ export default async function AssistantPage() {
 
   return (
     <div className="grid gap-6">
-      <PageHeader title="Cash Compass Assistant" description="Rule-based money guidance from your seeded transactions, bills, budgets, and goals." badge="No API key required" />
+      <PageHeader title="Cash Compass Assistant" description="Rule-based money guidance from your transactions, bills, budgets, and goals." badge="No API key required" />
       <Card className="glass-panel premium-glow spotlight-card relative overflow-hidden">
         <CompassSweep className="absolute right-4 top-4 size-24 opacity-30" />
         <CardHeader>

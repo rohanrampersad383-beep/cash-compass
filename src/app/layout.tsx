@@ -16,11 +16,34 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://cash-compass-finance.vercel.app"),
+  applicationName: "Cash Compass",
   title: {
     default: "Cash Compass",
     template: "%s | Cash Compass",
   },
   description: "A polished personal finance tracker and rule-based money guide for spending, bills, goals, budgets, and CSV imports.",
+  openGraph: {
+    title: "Cash Compass",
+    description: "Track spending, bills, budgets, savings goals, CSV imports, and rule-based money guidance in one polished finance dashboard.",
+    url: "https://cash-compass-finance.vercel.app",
+    siteName: "Cash Compass",
+    images: [
+      {
+        url: "/cash-compass-logo.png",
+        width: 535,
+        height: 140,
+        alt: "Cash Compass logo",
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Cash Compass",
+    description: "A polished personal finance tracker for spending, bills, budgets, goals, CSV imports, and rule-based guidance.",
+    images: ["/cash-compass-logo.png"],
+  },
   icons: {
     icon: "/favicon.png",
     shortcut: "/favicon.png",
