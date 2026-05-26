@@ -221,7 +221,7 @@ Vercel Analytics and Speed Insights are installed in the root App Router layout.
 
 ## Project Status
 
-Current status: deployed portfolio project / V1.
+Cash Compass is currently in a recruiter-ready V1 feature freeze. Core workflows are complete, deployed, documented, tested, and ready to be reviewed. Future improvements are tracked as optional enhancements rather than blockers while job applications are prioritized.
 
 Core finance tracking flows are complete:
 
@@ -235,16 +235,28 @@ Core finance tracking flows are complete:
 - settings, currency preferences, data export, privacy notice, and account deletion
 - first-time onboarding guidance and empty-workspace setup links
 
-Some product-level improvements remain before treating it as a production financial application for sensitive real data.
+The live app is suitable for portfolio review and demo/sample data. As with any finance product, sensitive real-user usage would require continued operational hardening, monitoring, and production support beyond this portfolio V1.
+
+## Reviewer Checklist
+
+- Live demo is deployed at [https://cash-compass-finance.vercel.app](https://cash-compass-finance.vercel.app)
+- Seeded demo workspace is available for quick review
+- Screenshots are included in `docs/screenshots`
+- README includes setup, architecture, security, privacy, deployment, and testing notes
+- Focused tests cover finance safety, authorization/user scoping, CSV import validation, data export, onboarding, and auth recovery token behavior
+- Core flows include auth recovery readiness, CSV import, custom category management, user data export, account deletion, and logout-all-sessions controls
 
 ## Future Improvements
 
+Optional enhancements for a later product phase:
+
+- Full integration tests with an isolated test database
+- Real email delivery setup with a verified Resend sender/domain
+- Advanced AI assistant integration
+- Budget alerts and notifications
+- Cash-flow forecasting
+- Multi-account tracking
 - Automatic category suggestions and reusable import rules
-- Transaction CSV export and automated export scheduling
-- Full integration tests for auth/session cookies and database-backed API authorization
-- Real AI assistant integration later
-- Budget alerts and notifications later
-- Optional onboarding checklist persistence for multi-session setup progress
 
 ## Recruiter Highlights
 
